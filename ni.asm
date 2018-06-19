@@ -4,7 +4,7 @@
 
 	.zpvar tmp, tmp0, tmp1, tmp2, tmp3 .word
 sw = $80 ;physical screen width in bytes (distance between beginnings of consecutive lines)
-sw_log = 48 ;logical screen width
+sw_log = $40 ;logical screen width
 sh = 128 ;screen height in lines
 screen = $4000
 pmgraph = $9000
@@ -28,7 +28,7 @@ start
 	mva #$0F COLBAKS
 	mva #$0f COLPF2S
 	
-	
+	jsr dl_addr_init
 	jsr sprites_init
     pause 1
 	jsr ground_init

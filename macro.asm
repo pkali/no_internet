@@ -1,7 +1,7 @@
 ;-------------------------------------
   .MACRO ROLW
      ROL :1
-    ROL :1+1
+     ROL :1+1
   .ENDM
 ;-------------------------------------
   .MACRO ASLW
@@ -20,26 +20,26 @@
   .ENDM
 
 ;-------------------------------------
-         .MACRO VMAIN
-;	VMAIN #WORD,interrupt.vector
-; interrupt.vector:
-;    0 - VIMIRQ
-;    1 - TIMCNT1
-;    2 - TIMCNT2
-;    3 - TIMCNT3
-;    4 - TIMCNT4
-;    5 - TIMCNT5
-;    6 - VVBLKI
-;    7 - VVBLKD
-;    8 - TIMVEC1
-;    9 - TIMVEC2
-;	Initialises Vertical Blank Interrupts
-;       (works only with system interrupts ON)
+.MACRO VMAIN ;	Initialises Vertical Blank Interrupts
+	;       (works only with system interrupts ON)
+         
+	;	VMAIN #WORD interrupt.vector
+    ; interrupt.vector:
+    ;    0 - VIMIRQ
+    ;    1 - TIMCNT1
+    ;    2 - TIMCNT2
+    ;    3 - TIMCNT3
+    ;    4 - TIMCNT4
+    ;    5 - TIMCNT5
+    ;    6 - VVBLKI
+    ;    7 - VVBLKD
+    ;    8 - TIMVEC1
+    ;    9 - TIMVEC2
          LDY # <:1
          LDX # >:1
          LDA #:2
          JSR SETVBV
-         .ENDM
+.ENDM
 ;-------------------------------------
          .MACRO VDLI
 ;	VDLI #WORD
@@ -65,6 +65,7 @@
          .MACRO KEY
 ;	KEY
 ;	waits for releasing and pressing "any key"
+;   with OS on autorepeat works
          PHA
 ?CK1      LDA SKSTAT
          AND #$04

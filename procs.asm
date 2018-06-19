@@ -1,5 +1,27 @@
 ;	@com.wudsn.ide.asm.mainsourcefile=ni.asm
 
+.proc dl_addr_init ;sets initial values for DL addressess
+	;uses AXY, tmp0, tmp1
+	_dl = tmp0
+	_scr = tmp1
+
+	mwa #dl_addrs+1 _dl
+	mwa #screen _scr
+
+	ldx #sh
+@	ldy #0
+	lda _scr
+	sta (_dl),y
+	lda _scr+1
+	iny
+	sta (_dl),y
+	adw _dl #3
+	adw _scr #sw
+	dex
+	bne @-
+	rts
+.endp
+
 .proc dino 		; dino to the screen
 	; uses: AXY tmp0 tmp1 tmp2 tmp3
 	; Y - ypos in lines
@@ -343,7 +365,12 @@ dino_save_pm_y_prev	.by 0
 	;uses: AXY
 
 	inc:lda x_scr_offset
-	cmp #sw_l
+	cmp #sw_log+1 ; is it end of the logical 2 screens?
+	bne @+
+	;start anew
+	mva #0 x_scr_offset
+	jsr dl_addr_init
+@
 	mwa #dl_addrs+1 incr+1 ;self mod
 	ldx #sh
 incr	inc $ffff
@@ -355,6 +382,7 @@ incr	inc $ffff
 x_scr_offset .by 0 ;where is the beginning of the screen
 
 .proc move_scr ;screen window one step (1/4 th of byte) right
+	;uses: AXY
 	dec:lda hscr_state
 	sta HSCROL
 	cmp #4

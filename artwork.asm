@@ -1,5 +1,12 @@
 ;	@com.wudsn.ide.asm.mainsourcefile=ni.asm
 ;-------------------------------------------------------------
+;screen layout
+;0                                    0                       0                                  1
+;0                                    4                       7                                  2     
+;0                                    7                       9                                  7
+;|     initial window-->              |                         when drawing here, copy to zero
+; |------------------------------------------------------------|
+
 	;24x24 pix = 3x3 chars (3x24 bytes)
 	.rept 3, #
 dino:1 

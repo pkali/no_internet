@@ -493,7 +493,7 @@ Source: C:\jac\wudsn\Workspace\no_internet\macro.asm
      1 				;-------------------------------------
      2 				  .MACRO ROLW
      3 				     ROL :1
-     4 				    ROL :1+1
+     4 				     ROL :1+1
      5 				  .ENDM
      6 				;-------------------------------------
      7 				  .MACRO ASLW
@@ -512,26 +512,26 @@ Source: C:\jac\wudsn\Workspace\no_internet\macro.asm
     20 				  .ENDM
     21
     22 				;-------------------------------------
-    23 				         .MACRO VMAIN
-    24 				;	VMAIN #WORD,interrupt.vector
-    25 				; interrupt.vector:
-    26 				;    0 - VIMIRQ
-    27 				;    1 - TIMCNT1
-    28 				;    2 - TIMCNT2
-    29 				;    3 - TIMCNT3
-    30 				;    4 - TIMCNT4
-    31 				;    5 - TIMCNT5
-    32 				;    6 - VVBLKI
-    33 				;    7 - VVBLKD
-    34 				;    8 - TIMVEC1
-    35 				;    9 - TIMVEC2
-    36 				;	Initialises Vertical Blank Interrupts
-    37 				;       (works only with system interrupts ON)
+    23 				.MACRO VMAIN ;	Initialises Vertical Blank Interrupts
+    24 					;       (works only with system interrupts ON)
+    25 				         
+    26 					;	VMAIN #WORD interrupt.vector
+    27 				    ; interrupt.vector:
+    28 				    ;    0 - VIMIRQ
+    29 				    ;    1 - TIMCNT1
+    30 				    ;    2 - TIMCNT2
+    31 				    ;    3 - TIMCNT3
+    32 				    ;    4 - TIMCNT4
+    33 				    ;    5 - TIMCNT5
+    34 				    ;    6 - VVBLKI
+    35 				    ;    7 - VVBLKD
+    36 				    ;    8 - TIMVEC1
+    37 				    ;    9 - TIMVEC2
     38 				         LDY # <:1
     39 				         LDX # >:1
     40 				         LDA #:2
     41 				         JSR SETVBV
-    42 				         .ENDM
+    42 				.ENDM
     43 				;-------------------------------------
     44 				         .MACRO VDLI
     45 				;	VDLI #WORD
@@ -557,852 +557,885 @@ Source: C:\jac\wudsn\Workspace\no_internet\macro.asm
     65 				         .MACRO KEY
     66 				;	KEY
     67 				;	waits for releasing and pressing "any key"
-    68 				         PHA
-    69 				?CK1      LDA SKSTAT
-    70 				         AND #$04
-    71 				         BEQ ?CK1
-    72 				?CK       LDA SKSTAT
-    73 				         AND #$04
-    74 				         BNE ?CK
-    75 				         PLA
-    76 				         .ENDM
-    77 				;-------------------------------------
-    78 					.MACRO WAIT	;waits one frame (1/50 s(PAL) or 1/60s(NTSC))
-    79 					;uses: A
-    80 						LDA VCOUNT
-    81 						STA WSYNC
+    68 				;   with OS on autorepeat works
+    69 				         PHA
+    70 				?CK1      LDA SKSTAT
+    71 				         AND #$04
+    72 				         BEQ ?CK1
+    73 				?CK       LDA SKSTAT
+    74 				         AND #$04
+    75 				         BNE ?CK
+    76 				         PLA
+    77 				         .ENDM
+    78 				;-------------------------------------
+    79 					.MACRO WAIT	;waits one frame (1/50 s(PAL) or 1/60s(NTSC))
+    80 					;uses: A
+    81 						LDA VCOUNT
     82 						STA WSYNC
     83 						STA WSYNC
-    84 				@		CMP VCOUNT
-    85 						BNE @-
-    86 					.ENDM
-    87 				;-------------------------------------
-    88 				    .macro negw
-    89 				    ; negate the given word (0-a)
-    90 				;-------------------------------------
-    91 				        sec
-    92 				        lda #$00
-    93 				        sbc :1
-    94 				        sta :1
-    95 				        lda #$00
-    96 				        sbc :1+1
-    97 				        sta :1+1
-    98 				    .endm
-    99 				;-------------------------------------
-   100 				    .macro randomize     ;returns (in A) a random .byte between "floor" (incl) and "ceiling" (excl)
-   101 				    ;usage: randomize floor ceiling AND
-   102 				    ;uses: A
-   103 				    
-   104 				?rand
-   105 				      lda random
-   106 				      .if :3
-   107 				      	and #:3
-   108 				      .endif
-   109 				      cmp #:1 		;floor
-   110 				      bcc ?rand
-   111 				      cmp #:2+1 	;ceiling
-   112 				      bcs ?rand
-   113 				    .endm
-   114 				;-------------------------------------
-   115 				    .macro phx
-   116 				      txa
-   117 				      pha
-   118 				    .endm
-   119 				;-------------------------------------
-   120 				    .macro phy
-   121 				      tya
-   122 				      pha
-   123 				    .endm
-   124 				;-------------------------------------
-   125 				    .macro plx
-   126 				      pla
-   127 				      tax
-   128 				    .endm
-   129 				;-------------------------------------
-   130 				    .macro ply
-   131 				      pla
-   132 				      tay
-   133 				    .endm
-   134 				;-------------------------------------
-   135 					.macro pause	;waits :1 number (byte) of frames 
-   136 					;uses: AX
-   137 					.if :1 > 0 
-   138 						ldx #:1
-   139 				loop   	wait
-   140 				      	dex
-   141 				      	bne loop
-   142 				     .else
-   143 				     	wait
-   144 				     .endif
-   145 				    .ENDM
-   146
+    84 						STA WSYNC
+    85 				@		CMP VCOUNT
+    86 						BNE @-
+    87 					.ENDM
+    88 				;-------------------------------------
+    89 				    .macro negw
+    90 				    ; negate the given word (0-a)
+    91 				;-------------------------------------
+    92 				        sec
+    93 				        lda #$00
+    94 				        sbc :1
+    95 				        sta :1
+    96 				        lda #$00
+    97 				        sbc :1+1
+    98 				        sta :1+1
+    99 				    .endm
+   100 				;-------------------------------------
+   101 				    .macro randomize     ;returns (in A) a random .byte between "floor" (incl) and "ceiling" (excl)
+   102 				    ;usage: randomize floor ceiling AND
+   103 				    ;uses: A
+   104 				    
+   105 				?rand
+   106 				      lda random
+   107 				      .if :3
+   108 				      	and #:3
+   109 				      .endif
+   110 				      cmp #:1 		;floor
+   111 				      bcc ?rand
+   112 				      cmp #:2+1 	;ceiling
+   113 				      bcs ?rand
+   114 				    .endm
+   115 				;-------------------------------------
+   116 				    .macro phx
+   117 				      txa
+   118 				      pha
+   119 				    .endm
+   120 				;-------------------------------------
+   121 				    .macro phy
+   122 				      tya
+   123 				      pha
+   124 				    .endm
+   125 				;-------------------------------------
+   126 				    .macro plx
+   127 				      pla
+   128 				      tax
+   129 				    .endm
+   130 				;-------------------------------------
+   131 				    .macro ply
+   132 				      pla
+   133 				      tay
+   134 				    .endm
+   135 				;-------------------------------------
+   136 					.macro pause	;waits :1 number (byte) of frames 
+   137 					;uses: AX
+   138 					.if :1 > 0 
+   139 						ldx #:1
+   140 				loop   	wait
+   141 				      	dex
+   142 				      	bne loop
+   143 				     .else
+   144 				     	wait
+   145 				     .endif
+   146 				    .ENDM
+   147
      4
      5 					.zpvar tmp, tmp0, tmp1, tmp2, tmp3 .word
-     6 = 0080			sw = $80 ;screen width in bytes
-     7 = 0080			sh = 128 ; screen height in lines
-     8 = 4000			screen = $4000
-     9 = 9000			pmgraph = $9000
-    10 = 0080			TMP
-    10 = 0082			TMP0
-    10 = 0084			TMP1
-    10 = 0086			TMP2
-    10 = 0088			TMP3
-    10 					org $2000
-    11 				dl
-    12 FFFF> 2000-2250> 70 70 + 	.byte $70,$70,$70
-    13 2003			dl_addrs ;start of lines
-    14 					.REPT sh
-    15 						.BYTE $5F
-    16 						.WORD SCREEN+#*SW
-    17 					.ENDR
-    17 					.ENDR
+     6 = 0080			sw = $80 ;physical screen width in bytes (distance between beginnings of consecutive lines)
+     7 = 0040			sw_log = $40 ;logical screen width
+     8 = 0080			sh = 128 ;screen height in lines
+     9 = 4000			screen = $4000
+    10 = 9000			pmgraph = $9000
+    11 = 0080			TMP
+    11 = 0082			TMP0
+    11 = 0084			TMP1
+    11 = 0086			TMP2
+    11 = 0088			TMP3
+    11 					org $2000
+    12 				dl
+    13 FFFF> 2000-2253> 70 70 + 	.byte $70,$70,$70
+    14 2003			dl_addrs ;start of lines
+    15 					.REPT sh
+    16 						.BYTE $5F
+    17 						.WORD SCREEN+#*SW
+    18 					.ENDR
+    18 					.ENDR
 Source: REPT
-    15 2003 5F					.BYTE $5F
-    15 2004 00 40				.WORD SCREEN+#*SW
-    15 2006 5F					.BYTE $5F
-    15 2007 80 40				.WORD SCREEN+#*SW
-    15 2009 5F					.BYTE $5F
-    15 200A 00 41				.WORD SCREEN+#*SW
-    15 200C 5F					.BYTE $5F
-    15 200D 80 41				.WORD SCREEN+#*SW
-    15 200F 5F					.BYTE $5F
-    15 2010 00 42				.WORD SCREEN+#*SW
-    15 2012 5F					.BYTE $5F
-    15 2013 80 42				.WORD SCREEN+#*SW
-    15 2015 5F					.BYTE $5F
-    15 2016 00 43				.WORD SCREEN+#*SW
-    15 2018 5F					.BYTE $5F
-    15 2019 80 43				.WORD SCREEN+#*SW
-    15 201B 5F					.BYTE $5F
-    15 201C 00 44				.WORD SCREEN+#*SW
-    15 201E 5F					.BYTE $5F
-    15 201F 80 44				.WORD SCREEN+#*SW
-    15 2021 5F					.BYTE $5F
-    15 2022 00 45				.WORD SCREEN+#*SW
-    15 2024 5F					.BYTE $5F
-    15 2025 80 45				.WORD SCREEN+#*SW
-    15 2027 5F					.BYTE $5F
-    15 2028 00 46				.WORD SCREEN+#*SW
-    15 202A 5F					.BYTE $5F
-    15 202B 80 46				.WORD SCREEN+#*SW
-    15 202D 5F					.BYTE $5F
-    15 202E 00 47				.WORD SCREEN+#*SW
-    15 2030 5F					.BYTE $5F
-    15 2031 80 47				.WORD SCREEN+#*SW
-    15 2033 5F					.BYTE $5F
-    15 2034 00 48				.WORD SCREEN+#*SW
-    15 2036 5F					.BYTE $5F
-    15 2037 80 48				.WORD SCREEN+#*SW
-    15 2039 5F					.BYTE $5F
-    15 203A 00 49				.WORD SCREEN+#*SW
-    15 203C 5F					.BYTE $5F
-    15 203D 80 49				.WORD SCREEN+#*SW
-    15 203F 5F					.BYTE $5F
-    15 2040 00 4A				.WORD SCREEN+#*SW
-    15 2042 5F					.BYTE $5F
-    15 2043 80 4A				.WORD SCREEN+#*SW
-    15 2045 5F					.BYTE $5F
-    15 2046 00 4B				.WORD SCREEN+#*SW
-    15 2048 5F					.BYTE $5F
-    15 2049 80 4B				.WORD SCREEN+#*SW
-    15 204B 5F					.BYTE $5F
-    15 204C 00 4C				.WORD SCREEN+#*SW
-    15 204E 5F					.BYTE $5F
-    15 204F 80 4C				.WORD SCREEN+#*SW
-    15 2051 5F					.BYTE $5F
-    15 2052 00 4D				.WORD SCREEN+#*SW
-    15 2054 5F					.BYTE $5F
-    15 2055 80 4D				.WORD SCREEN+#*SW
-    15 2057 5F					.BYTE $5F
-    15 2058 00 4E				.WORD SCREEN+#*SW
-    15 205A 5F					.BYTE $5F
-    15 205B 80 4E				.WORD SCREEN+#*SW
-    15 205D 5F					.BYTE $5F
-    15 205E 00 4F				.WORD SCREEN+#*SW
-    15 2060 5F					.BYTE $5F
-    15 2061 80 4F				.WORD SCREEN+#*SW
-    15 2063 5F					.BYTE $5F
-    15 2064 00 50				.WORD SCREEN+#*SW
-    15 2066 5F					.BYTE $5F
-    15 2067 80 50				.WORD SCREEN+#*SW
-    15 2069 5F					.BYTE $5F
-    15 206A 00 51				.WORD SCREEN+#*SW
-    15 206C 5F					.BYTE $5F
-    15 206D 80 51				.WORD SCREEN+#*SW
-    15 206F 5F					.BYTE $5F
-    15 2070 00 52				.WORD SCREEN+#*SW
-    15 2072 5F					.BYTE $5F
-    15 2073 80 52				.WORD SCREEN+#*SW
-    15 2075 5F					.BYTE $5F
-    15 2076 00 53				.WORD SCREEN+#*SW
-    15 2078 5F					.BYTE $5F
-    15 2079 80 53				.WORD SCREEN+#*SW
-    15 207B 5F					.BYTE $5F
-    15 207C 00 54				.WORD SCREEN+#*SW
-    15 207E 5F					.BYTE $5F
-    15 207F 80 54				.WORD SCREEN+#*SW
-    15 2081 5F					.BYTE $5F
-    15 2082 00 55				.WORD SCREEN+#*SW
-    15 2084 5F					.BYTE $5F
-    15 2085 80 55				.WORD SCREEN+#*SW
-    15 2087 5F					.BYTE $5F
-    15 2088 00 56				.WORD SCREEN+#*SW
-    15 208A 5F					.BYTE $5F
-    15 208B 80 56				.WORD SCREEN+#*SW
-    15 208D 5F					.BYTE $5F
-    15 208E 00 57				.WORD SCREEN+#*SW
-    15 2090 5F					.BYTE $5F
-    15 2091 80 57				.WORD SCREEN+#*SW
-    15 2093 5F					.BYTE $5F
-    15 2094 00 58				.WORD SCREEN+#*SW
-    15 2096 5F					.BYTE $5F
-    15 2097 80 58				.WORD SCREEN+#*SW
-    15 2099 5F					.BYTE $5F
-    15 209A 00 59				.WORD SCREEN+#*SW
-    15 209C 5F					.BYTE $5F
-    15 209D 80 59				.WORD SCREEN+#*SW
-    15 209F 5F					.BYTE $5F
-    15 20A0 00 5A				.WORD SCREEN+#*SW
-    15 20A2 5F					.BYTE $5F
-    15 20A3 80 5A				.WORD SCREEN+#*SW
-    15 20A5 5F					.BYTE $5F
-    15 20A6 00 5B				.WORD SCREEN+#*SW
-    15 20A8 5F					.BYTE $5F
-    15 20A9 80 5B				.WORD SCREEN+#*SW
-    15 20AB 5F					.BYTE $5F
-    15 20AC 00 5C				.WORD SCREEN+#*SW
-    15 20AE 5F					.BYTE $5F
-    15 20AF 80 5C				.WORD SCREEN+#*SW
-    15 20B1 5F					.BYTE $5F
-    15 20B2 00 5D				.WORD SCREEN+#*SW
-    15 20B4 5F					.BYTE $5F
-    15 20B5 80 5D				.WORD SCREEN+#*SW
-    15 20B7 5F					.BYTE $5F
-    15 20B8 00 5E				.WORD SCREEN+#*SW
-    15 20BA 5F					.BYTE $5F
-    15 20BB 80 5E				.WORD SCREEN+#*SW
-    15 20BD 5F					.BYTE $5F
-    15 20BE 00 5F				.WORD SCREEN+#*SW
-    15 20C0 5F					.BYTE $5F
-    15 20C1 80 5F				.WORD SCREEN+#*SW
-    15 20C3 5F					.BYTE $5F
-    15 20C4 00 60				.WORD SCREEN+#*SW
-    15 20C6 5F					.BYTE $5F
-    15 20C7 80 60				.WORD SCREEN+#*SW
-    15 20C9 5F					.BYTE $5F
-    15 20CA 00 61				.WORD SCREEN+#*SW
-    15 20CC 5F					.BYTE $5F
-    15 20CD 80 61				.WORD SCREEN+#*SW
-    15 20CF 5F					.BYTE $5F
-    15 20D0 00 62				.WORD SCREEN+#*SW
-    15 20D2 5F					.BYTE $5F
-    15 20D3 80 62				.WORD SCREEN+#*SW
-    15 20D5 5F					.BYTE $5F
-    15 20D6 00 63				.WORD SCREEN+#*SW
-    15 20D8 5F					.BYTE $5F
-    15 20D9 80 63				.WORD SCREEN+#*SW
-    15 20DB 5F					.BYTE $5F
-    15 20DC 00 64				.WORD SCREEN+#*SW
-    15 20DE 5F					.BYTE $5F
-    15 20DF 80 64				.WORD SCREEN+#*SW
-    15 20E1 5F					.BYTE $5F
-    15 20E2 00 65				.WORD SCREEN+#*SW
-    15 20E4 5F					.BYTE $5F
-    15 20E5 80 65				.WORD SCREEN+#*SW
-    15 20E7 5F					.BYTE $5F
-    15 20E8 00 66				.WORD SCREEN+#*SW
-    15 20EA 5F					.BYTE $5F
-    15 20EB 80 66				.WORD SCREEN+#*SW
-    15 20ED 5F					.BYTE $5F
-    15 20EE 00 67				.WORD SCREEN+#*SW
-    15 20F0 5F					.BYTE $5F
-    15 20F1 80 67				.WORD SCREEN+#*SW
-    15 20F3 5F					.BYTE $5F
-    15 20F4 00 68				.WORD SCREEN+#*SW
-    15 20F6 5F					.BYTE $5F
-    15 20F7 80 68				.WORD SCREEN+#*SW
-    15 20F9 5F					.BYTE $5F
-    15 20FA 00 69				.WORD SCREEN+#*SW
-    15 20FC 5F					.BYTE $5F
-    15 20FD 80 69				.WORD SCREEN+#*SW
-    15 20FF 5F					.BYTE $5F
-    15 2100 00 6A				.WORD SCREEN+#*SW
-    15 2102 5F					.BYTE $5F
-    15 2103 80 6A				.WORD SCREEN+#*SW
-    15 2105 5F					.BYTE $5F
-    15 2106 00 6B				.WORD SCREEN+#*SW
-    15 2108 5F					.BYTE $5F
-    15 2109 80 6B				.WORD SCREEN+#*SW
-    15 210B 5F					.BYTE $5F
-    15 210C 00 6C				.WORD SCREEN+#*SW
-    15 210E 5F					.BYTE $5F
-    15 210F 80 6C				.WORD SCREEN+#*SW
-    15 2111 5F					.BYTE $5F
-    15 2112 00 6D				.WORD SCREEN+#*SW
-    15 2114 5F					.BYTE $5F
-    15 2115 80 6D				.WORD SCREEN+#*SW
-    15 2117 5F					.BYTE $5F
-    15 2118 00 6E				.WORD SCREEN+#*SW
-    15 211A 5F					.BYTE $5F
-    15 211B 80 6E				.WORD SCREEN+#*SW
-    15 211D 5F					.BYTE $5F
-    15 211E 00 6F				.WORD SCREEN+#*SW
-    15 2120 5F					.BYTE $5F
-    15 2121 80 6F				.WORD SCREEN+#*SW
-    15 2123 5F					.BYTE $5F
-    15 2124 00 70				.WORD SCREEN+#*SW
-    15 2126 5F					.BYTE $5F
-    15 2127 80 70				.WORD SCREEN+#*SW
-    15 2129 5F					.BYTE $5F
-    15 212A 00 71				.WORD SCREEN+#*SW
-    15 212C 5F					.BYTE $5F
-    15 212D 80 71				.WORD SCREEN+#*SW
-    15 212F 5F					.BYTE $5F
-    15 2130 00 72				.WORD SCREEN+#*SW
-    15 2132 5F					.BYTE $5F
-    15 2133 80 72				.WORD SCREEN+#*SW
-    15 2135 5F					.BYTE $5F
-    15 2136 00 73				.WORD SCREEN+#*SW
-    15 2138 5F					.BYTE $5F
-    15 2139 80 73				.WORD SCREEN+#*SW
-    15 213B 5F					.BYTE $5F
-    15 213C 00 74				.WORD SCREEN+#*SW
-    15 213E 5F					.BYTE $5F
-    15 213F 80 74				.WORD SCREEN+#*SW
-    15 2141 5F					.BYTE $5F
-    15 2142 00 75				.WORD SCREEN+#*SW
-    15 2144 5F					.BYTE $5F
-    15 2145 80 75				.WORD SCREEN+#*SW
-    15 2147 5F					.BYTE $5F
-    15 2148 00 76				.WORD SCREEN+#*SW
-    15 214A 5F					.BYTE $5F
-    15 214B 80 76				.WORD SCREEN+#*SW
-    15 214D 5F					.BYTE $5F
-    15 214E 00 77				.WORD SCREEN+#*SW
-    15 2150 5F					.BYTE $5F
-    15 2151 80 77				.WORD SCREEN+#*SW
-    15 2153 5F					.BYTE $5F
-    15 2154 00 78				.WORD SCREEN+#*SW
-    15 2156 5F					.BYTE $5F
-    15 2157 80 78				.WORD SCREEN+#*SW
-    15 2159 5F					.BYTE $5F
-    15 215A 00 79				.WORD SCREEN+#*SW
-    15 215C 5F					.BYTE $5F
-    15 215D 80 79				.WORD SCREEN+#*SW
-    15 215F 5F					.BYTE $5F
-    15 2160 00 7A				.WORD SCREEN+#*SW
-    15 2162 5F					.BYTE $5F
-    15 2163 80 7A				.WORD SCREEN+#*SW
-    15 2165 5F					.BYTE $5F
-    15 2166 00 7B				.WORD SCREEN+#*SW
-    15 2168 5F					.BYTE $5F
-    15 2169 80 7B				.WORD SCREEN+#*SW
-    15 216B 5F					.BYTE $5F
-    15 216C 00 7C				.WORD SCREEN+#*SW
-    15 216E 5F					.BYTE $5F
-    15 216F 80 7C				.WORD SCREEN+#*SW
-    15 2171 5F					.BYTE $5F
-    15 2172 00 7D				.WORD SCREEN+#*SW
-    15 2174 5F					.BYTE $5F
-    15 2175 80 7D				.WORD SCREEN+#*SW
-    15 2177 5F					.BYTE $5F
-    15 2178 00 7E				.WORD SCREEN+#*SW
-    15 217A 5F					.BYTE $5F
-    15 217B 80 7E				.WORD SCREEN+#*SW
-    15 217D 5F					.BYTE $5F
-    15 217E 00 7F				.WORD SCREEN+#*SW
-    15 2180 5F					.BYTE $5F
-    15 2181 80 7F				.WORD SCREEN+#*SW
+    16 2003 5F					.BYTE $5F
+    16 2004 00 40				.WORD SCREEN+#*SW
+    16 2006 5F					.BYTE $5F
+    16 2007 80 40				.WORD SCREEN+#*SW
+    16 2009 5F					.BYTE $5F
+    16 200A 00 41				.WORD SCREEN+#*SW
+    16 200C 5F					.BYTE $5F
+    16 200D 80 41				.WORD SCREEN+#*SW
+    16 200F 5F					.BYTE $5F
+    16 2010 00 42				.WORD SCREEN+#*SW
+    16 2012 5F					.BYTE $5F
+    16 2013 80 42				.WORD SCREEN+#*SW
+    16 2015 5F					.BYTE $5F
+    16 2016 00 43				.WORD SCREEN+#*SW
+    16 2018 5F					.BYTE $5F
+    16 2019 80 43				.WORD SCREEN+#*SW
+    16 201B 5F					.BYTE $5F
+    16 201C 00 44				.WORD SCREEN+#*SW
+    16 201E 5F					.BYTE $5F
+    16 201F 80 44				.WORD SCREEN+#*SW
+    16 2021 5F					.BYTE $5F
+    16 2022 00 45				.WORD SCREEN+#*SW
+    16 2024 5F					.BYTE $5F
+    16 2025 80 45				.WORD SCREEN+#*SW
+    16 2027 5F					.BYTE $5F
+    16 2028 00 46				.WORD SCREEN+#*SW
+    16 202A 5F					.BYTE $5F
+    16 202B 80 46				.WORD SCREEN+#*SW
+    16 202D 5F					.BYTE $5F
+    16 202E 00 47				.WORD SCREEN+#*SW
+    16 2030 5F					.BYTE $5F
+    16 2031 80 47				.WORD SCREEN+#*SW
+    16 2033 5F					.BYTE $5F
+    16 2034 00 48				.WORD SCREEN+#*SW
+    16 2036 5F					.BYTE $5F
+    16 2037 80 48				.WORD SCREEN+#*SW
+    16 2039 5F					.BYTE $5F
+    16 203A 00 49				.WORD SCREEN+#*SW
+    16 203C 5F					.BYTE $5F
+    16 203D 80 49				.WORD SCREEN+#*SW
+    16 203F 5F					.BYTE $5F
+    16 2040 00 4A				.WORD SCREEN+#*SW
+    16 2042 5F					.BYTE $5F
+    16 2043 80 4A				.WORD SCREEN+#*SW
+    16 2045 5F					.BYTE $5F
+    16 2046 00 4B				.WORD SCREEN+#*SW
+    16 2048 5F					.BYTE $5F
+    16 2049 80 4B				.WORD SCREEN+#*SW
+    16 204B 5F					.BYTE $5F
+    16 204C 00 4C				.WORD SCREEN+#*SW
+    16 204E 5F					.BYTE $5F
+    16 204F 80 4C				.WORD SCREEN+#*SW
+    16 2051 5F					.BYTE $5F
+    16 2052 00 4D				.WORD SCREEN+#*SW
+    16 2054 5F					.BYTE $5F
+    16 2055 80 4D				.WORD SCREEN+#*SW
+    16 2057 5F					.BYTE $5F
+    16 2058 00 4E				.WORD SCREEN+#*SW
+    16 205A 5F					.BYTE $5F
+    16 205B 80 4E				.WORD SCREEN+#*SW
+    16 205D 5F					.BYTE $5F
+    16 205E 00 4F				.WORD SCREEN+#*SW
+    16 2060 5F					.BYTE $5F
+    16 2061 80 4F				.WORD SCREEN+#*SW
+    16 2063 5F					.BYTE $5F
+    16 2064 00 50				.WORD SCREEN+#*SW
+    16 2066 5F					.BYTE $5F
+    16 2067 80 50				.WORD SCREEN+#*SW
+    16 2069 5F					.BYTE $5F
+    16 206A 00 51				.WORD SCREEN+#*SW
+    16 206C 5F					.BYTE $5F
+    16 206D 80 51				.WORD SCREEN+#*SW
+    16 206F 5F					.BYTE $5F
+    16 2070 00 52				.WORD SCREEN+#*SW
+    16 2072 5F					.BYTE $5F
+    16 2073 80 52				.WORD SCREEN+#*SW
+    16 2075 5F					.BYTE $5F
+    16 2076 00 53				.WORD SCREEN+#*SW
+    16 2078 5F					.BYTE $5F
+    16 2079 80 53				.WORD SCREEN+#*SW
+    16 207B 5F					.BYTE $5F
+    16 207C 00 54				.WORD SCREEN+#*SW
+    16 207E 5F					.BYTE $5F
+    16 207F 80 54				.WORD SCREEN+#*SW
+    16 2081 5F					.BYTE $5F
+    16 2082 00 55				.WORD SCREEN+#*SW
+    16 2084 5F					.BYTE $5F
+    16 2085 80 55				.WORD SCREEN+#*SW
+    16 2087 5F					.BYTE $5F
+    16 2088 00 56				.WORD SCREEN+#*SW
+    16 208A 5F					.BYTE $5F
+    16 208B 80 56				.WORD SCREEN+#*SW
+    16 208D 5F					.BYTE $5F
+    16 208E 00 57				.WORD SCREEN+#*SW
+    16 2090 5F					.BYTE $5F
+    16 2091 80 57				.WORD SCREEN+#*SW
+    16 2093 5F					.BYTE $5F
+    16 2094 00 58				.WORD SCREEN+#*SW
+    16 2096 5F					.BYTE $5F
+    16 2097 80 58				.WORD SCREEN+#*SW
+    16 2099 5F					.BYTE $5F
+    16 209A 00 59				.WORD SCREEN+#*SW
+    16 209C 5F					.BYTE $5F
+    16 209D 80 59				.WORD SCREEN+#*SW
+    16 209F 5F					.BYTE $5F
+    16 20A0 00 5A				.WORD SCREEN+#*SW
+    16 20A2 5F					.BYTE $5F
+    16 20A3 80 5A				.WORD SCREEN+#*SW
+    16 20A5 5F					.BYTE $5F
+    16 20A6 00 5B				.WORD SCREEN+#*SW
+    16 20A8 5F					.BYTE $5F
+    16 20A9 80 5B				.WORD SCREEN+#*SW
+    16 20AB 5F					.BYTE $5F
+    16 20AC 00 5C				.WORD SCREEN+#*SW
+    16 20AE 5F					.BYTE $5F
+    16 20AF 80 5C				.WORD SCREEN+#*SW
+    16 20B1 5F					.BYTE $5F
+    16 20B2 00 5D				.WORD SCREEN+#*SW
+    16 20B4 5F					.BYTE $5F
+    16 20B5 80 5D				.WORD SCREEN+#*SW
+    16 20B7 5F					.BYTE $5F
+    16 20B8 00 5E				.WORD SCREEN+#*SW
+    16 20BA 5F					.BYTE $5F
+    16 20BB 80 5E				.WORD SCREEN+#*SW
+    16 20BD 5F					.BYTE $5F
+    16 20BE 00 5F				.WORD SCREEN+#*SW
+    16 20C0 5F					.BYTE $5F
+    16 20C1 80 5F				.WORD SCREEN+#*SW
+    16 20C3 5F					.BYTE $5F
+    16 20C4 00 60				.WORD SCREEN+#*SW
+    16 20C6 5F					.BYTE $5F
+    16 20C7 80 60				.WORD SCREEN+#*SW
+    16 20C9 5F					.BYTE $5F
+    16 20CA 00 61				.WORD SCREEN+#*SW
+    16 20CC 5F					.BYTE $5F
+    16 20CD 80 61				.WORD SCREEN+#*SW
+    16 20CF 5F					.BYTE $5F
+    16 20D0 00 62				.WORD SCREEN+#*SW
+    16 20D2 5F					.BYTE $5F
+    16 20D3 80 62				.WORD SCREEN+#*SW
+    16 20D5 5F					.BYTE $5F
+    16 20D6 00 63				.WORD SCREEN+#*SW
+    16 20D8 5F					.BYTE $5F
+    16 20D9 80 63				.WORD SCREEN+#*SW
+    16 20DB 5F					.BYTE $5F
+    16 20DC 00 64				.WORD SCREEN+#*SW
+    16 20DE 5F					.BYTE $5F
+    16 20DF 80 64				.WORD SCREEN+#*SW
+    16 20E1 5F					.BYTE $5F
+    16 20E2 00 65				.WORD SCREEN+#*SW
+    16 20E4 5F					.BYTE $5F
+    16 20E5 80 65				.WORD SCREEN+#*SW
+    16 20E7 5F					.BYTE $5F
+    16 20E8 00 66				.WORD SCREEN+#*SW
+    16 20EA 5F					.BYTE $5F
+    16 20EB 80 66				.WORD SCREEN+#*SW
+    16 20ED 5F					.BYTE $5F
+    16 20EE 00 67				.WORD SCREEN+#*SW
+    16 20F0 5F					.BYTE $5F
+    16 20F1 80 67				.WORD SCREEN+#*SW
+    16 20F3 5F					.BYTE $5F
+    16 20F4 00 68				.WORD SCREEN+#*SW
+    16 20F6 5F					.BYTE $5F
+    16 20F7 80 68				.WORD SCREEN+#*SW
+    16 20F9 5F					.BYTE $5F
+    16 20FA 00 69				.WORD SCREEN+#*SW
+    16 20FC 5F					.BYTE $5F
+    16 20FD 80 69				.WORD SCREEN+#*SW
+    16 20FF 5F					.BYTE $5F
+    16 2100 00 6A				.WORD SCREEN+#*SW
+    16 2102 5F					.BYTE $5F
+    16 2103 80 6A				.WORD SCREEN+#*SW
+    16 2105 5F					.BYTE $5F
+    16 2106 00 6B				.WORD SCREEN+#*SW
+    16 2108 5F					.BYTE $5F
+    16 2109 80 6B				.WORD SCREEN+#*SW
+    16 210B 5F					.BYTE $5F
+    16 210C 00 6C				.WORD SCREEN+#*SW
+    16 210E 5F					.BYTE $5F
+    16 210F 80 6C				.WORD SCREEN+#*SW
+    16 2111 5F					.BYTE $5F
+    16 2112 00 6D				.WORD SCREEN+#*SW
+    16 2114 5F					.BYTE $5F
+    16 2115 80 6D				.WORD SCREEN+#*SW
+    16 2117 5F					.BYTE $5F
+    16 2118 00 6E				.WORD SCREEN+#*SW
+    16 211A 5F					.BYTE $5F
+    16 211B 80 6E				.WORD SCREEN+#*SW
+    16 211D 5F					.BYTE $5F
+    16 211E 00 6F				.WORD SCREEN+#*SW
+    16 2120 5F					.BYTE $5F
+    16 2121 80 6F				.WORD SCREEN+#*SW
+    16 2123 5F					.BYTE $5F
+    16 2124 00 70				.WORD SCREEN+#*SW
+    16 2126 5F					.BYTE $5F
+    16 2127 80 70				.WORD SCREEN+#*SW
+    16 2129 5F					.BYTE $5F
+    16 212A 00 71				.WORD SCREEN+#*SW
+    16 212C 5F					.BYTE $5F
+    16 212D 80 71				.WORD SCREEN+#*SW
+    16 212F 5F					.BYTE $5F
+    16 2130 00 72				.WORD SCREEN+#*SW
+    16 2132 5F					.BYTE $5F
+    16 2133 80 72				.WORD SCREEN+#*SW
+    16 2135 5F					.BYTE $5F
+    16 2136 00 73				.WORD SCREEN+#*SW
+    16 2138 5F					.BYTE $5F
+    16 2139 80 73				.WORD SCREEN+#*SW
+    16 213B 5F					.BYTE $5F
+    16 213C 00 74				.WORD SCREEN+#*SW
+    16 213E 5F					.BYTE $5F
+    16 213F 80 74				.WORD SCREEN+#*SW
+    16 2141 5F					.BYTE $5F
+    16 2142 00 75				.WORD SCREEN+#*SW
+    16 2144 5F					.BYTE $5F
+    16 2145 80 75				.WORD SCREEN+#*SW
+    16 2147 5F					.BYTE $5F
+    16 2148 00 76				.WORD SCREEN+#*SW
+    16 214A 5F					.BYTE $5F
+    16 214B 80 76				.WORD SCREEN+#*SW
+    16 214D 5F					.BYTE $5F
+    16 214E 00 77				.WORD SCREEN+#*SW
+    16 2150 5F					.BYTE $5F
+    16 2151 80 77				.WORD SCREEN+#*SW
+    16 2153 5F					.BYTE $5F
+    16 2154 00 78				.WORD SCREEN+#*SW
+    16 2156 5F					.BYTE $5F
+    16 2157 80 78				.WORD SCREEN+#*SW
+    16 2159 5F					.BYTE $5F
+    16 215A 00 79				.WORD SCREEN+#*SW
+    16 215C 5F					.BYTE $5F
+    16 215D 80 79				.WORD SCREEN+#*SW
+    16 215F 5F					.BYTE $5F
+    16 2160 00 7A				.WORD SCREEN+#*SW
+    16 2162 5F					.BYTE $5F
+    16 2163 80 7A				.WORD SCREEN+#*SW
+    16 2165 5F					.BYTE $5F
+    16 2166 00 7B				.WORD SCREEN+#*SW
+    16 2168 5F					.BYTE $5F
+    16 2169 80 7B				.WORD SCREEN+#*SW
+    16 216B 5F					.BYTE $5F
+    16 216C 00 7C				.WORD SCREEN+#*SW
+    16 216E 5F					.BYTE $5F
+    16 216F 80 7C				.WORD SCREEN+#*SW
+    16 2171 5F					.BYTE $5F
+    16 2172 00 7D				.WORD SCREEN+#*SW
+    16 2174 5F					.BYTE $5F
+    16 2175 80 7D				.WORD SCREEN+#*SW
+    16 2177 5F					.BYTE $5F
+    16 2178 00 7E				.WORD SCREEN+#*SW
+    16 217A 5F					.BYTE $5F
+    16 217B 80 7E				.WORD SCREEN+#*SW
+    16 217D 5F					.BYTE $5F
+    16 217E 00 7F				.WORD SCREEN+#*SW
+    16 2180 5F					.BYTE $5F
+    16 2181 80 7F				.WORD SCREEN+#*SW
 Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
-    18 2183 41				.byte $41
-    19 2184 00 20			.word DL
-    20 2186			start
-    21 2186 A9 23 8D 2F 02		mva #%00100011  DMACTLS    
-    22 218B A9 00 8D 30 02 A9 + 	mwa #dl DLPTRS
-    23 2195 A9 0C 8D 20 25		mva #12 move_scr.hscr_state ;hscroll initialisation
-    24 219A 8D 04 D4			sta HSCROL
-    25 					
-    26 219D A9 00 8D C5 02		mva #0 COLPF1S
-    27 21A2 A9 0F 8D C8 02		mva #$0F COLBAKS
-    28 21A7 A9 0F 8D C6 02		mva #$0f COLPF2S
-    29 					
+    19 2183 41				.byte $41
+    20 2184 00 20			.word DL
+    21 2186			start
+    22 2186 A9 23 8D 2F 02		mva #%00100011  DMACTLS    
+    23 218B A9 00 8D 30 02 A9 + 	mwa #dl DLPTRS
+    24 2195 A9 0C 8D 6D 25		mva #12 move_scr.hscr_state ;hscroll initialisation
+    25 219A 8D 04 D4			sta HSCROL
+    26 					
+    27 219D A9 00 8D C5 02		mva #0 COLPF1S
+    28 21A2 A9 0F 8D C8 02		mva #$0F COLBAKS
+    29 21A7 A9 0F 8D C6 02		mva #$0f COLPF2S
     30 					
-    31 21AC 20 FA 23			jsr sprites_init
-    32 21AF			    pause 1
+    31 21AC 20 55 22			jsr dl_addr_init
+    32 21AF 20 34 24			jsr sprites_init
+    33 21B2			    pause 1
 Macro: PAUSE [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
-     3 21AF A2 01				ldx #1
-     4 21B1			loop   	wait
+     3 21B2 A2 01				ldx #1
+     4 21B4			loop   	wait
 Macro: WAIT [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
-     2 21B1 AD 0B D4				LDA VCOUNT
-     3 21B4 8D 0A D4				STA WSYNC
-     4 21B7 8D 0A D4				STA WSYNC
-     5 21BA 8D 0A D4				STA WSYNC
-     6 21BD CD 0B D4		@		CMP VCOUNT
-     7 21C0 D0 FB				BNE @-
+     2 21B4 AD 0B D4				LDA VCOUNT
+     3 21B7 8D 0A D4				STA WSYNC
+     4 21BA 8D 0A D4				STA WSYNC
+     5 21BD 8D 0A D4				STA WSYNC
+     6 21C0 CD 0B D4		@		CMP VCOUNT
+     7 21C3 D0 FB				BNE @-
 Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
-     5 21C2 CA			      	dex
-     6 21C3 D0 EC		      	bne loop
+     5 21C5 CA			      	dex
+     6 21C6 D0 EC		      	bne loop
 Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
-    33 21C5 20 89 23			jsr ground_init
-    34
-    35 21C8 A2 14			ldx #20
-    36 21CA A0 00			ldy #0
-    37 21CC 20 AA 23			jsr cactus
-    38 21CF A2 1E			ldx #30
-    39 21D1 A0 01			ldy #1
-    40 21D3 20 AA 23			jsr cactus
-    41 21D6 A2 28			ldx #40
-    42 21D8 A0 02			ldy #2
-    43 21DA 20 AA 23			jsr cactus
-    44
-    45 21DD A2 00		xx	ldx #0 ; anim phaze
-    46 21DF A0 36		yy	ldy #54
-    47 21E1 20 32 24			jsr dino_pm
-    48 21E4 EE DE 21 AD DE 21		inc:lda xx+1
-    49 21EA C9 03			cmp #3
-    50 21EC D0 05			sne
-    51 21EE A9 00 8D DE 21		mva #0 xx+1	
-    52 21F3				key
+    34 21C8 20 C3 23			jsr ground_init
+    35
+    36 21CB A2 14			ldx #20
+    37 21CD A0 00			ldy #0
+    38 21CF 20 E4 23			jsr cactus
+    39 21D2 A2 1E			ldx #30
+    40 21D4 A0 01			ldy #1
+    41 21D6 20 E4 23			jsr cactus
+    42 21D9 A2 28			ldx #40
+    43 21DB A0 02			ldy #2
+    44 21DD 20 E4 23			jsr cactus
+    45
+    46 21E0 A2 00		xx	ldx #0 ; anim phaze
+    47 21E2 A0 36		yy	ldy #54
+    48 21E4 20 6C 24			jsr dino_pm
+    49 21E7 EE E1 21 AD E1 21		inc:lda xx+1
+    50 21ED C9 03			cmp #3
+    51 21EF D0 05			sne
+    52 21F1 A9 00 8D E1 21		mva #0 xx+1	
+    53 21F6				key
 Macro: KEY [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
-     3 21F3 48			         PHA
-     4 21F4 AD 0F D2		?CK1      LDA SKSTAT
-     5 21F7 29 04		         AND #$04
-     6 21F9 F0 F9		         BEQ ?CK1
-     7 21FB AD 0F D2		?CK       LDA SKSTAT
-     8 21FE 29 04		         AND #$04
-     9 2200 D0 F9		         BNE ?CK
-    10 2202 68			         PLA
+     4 21F6 48			         PHA
+     5 21F7 AD 0F D2		?CK1      LDA SKSTAT
+     6 21FA 29 04		         AND #$04
+     7 21FC F0 F9		         BEQ ?CK1
+     8 21FE AD 0F D2		?CK       LDA SKSTAT
+     9 2201 29 04		         AND #$04
+    10 2203 D0 F9		         BNE ?CK
+    11 2205 68			         PLA
 Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
-    53 2203 20 04 25			jsr move_scr
-    54 2206 4C DD 21			jmp xx
-    55
+    54 2206 20 51 25			jsr move_scr
+    55 2209 4C E0 21			jmp xx
     56
-    57 2209			llp
-    58 2209 A9 00 8D 51 22		mva #0 ntmp
-    59 220E			lp
-    60 220E AE 51 22			ldx ntmp
-    61 2211 A0 62			ldy #98
-    62 2213 20 52 22			jsr dino
-    63 2216				key
+    57
+    58 220C			llp
+    59 220C A9 00 8D 54 22		mva #0 ntmp
+    60 2211			lp
+    61 2211 AE 54 22			ldx ntmp
+    62 2214 A0 62			ldy #98
+    63 2216 20 8C 22			jsr dino
+    64 2219				key
 Macro: KEY [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
-     3 2216 48			         PHA
-     4 2217 AD 0F D2		?CK1      LDA SKSTAT
-     5 221A 29 04		         AND #$04
-     6 221C F0 F9		         BEQ ?CK1
-     7 221E AD 0F D2		?CK       LDA SKSTAT
-     8 2221 29 04		         AND #$04
-     9 2223 D0 F9		         BNE ?CK
-    10 2225 68			         PLA
+     4 2219 48			         PHA
+     5 221A AD 0F D2		?CK1      LDA SKSTAT
+     6 221D 29 04		         AND #$04
+     7 221F F0 F9		         BEQ ?CK1
+     8 2221 AD 0F D2		?CK       LDA SKSTAT
+     9 2224 29 04		         AND #$04
+    10 2226 D0 F9		         BNE ?CK
+    11 2228 68			         PLA
 Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
-    64 2226 20 D5 22			jsr dino_clear
-    65 2229				key
+    65 2229 20 0F 23			jsr dino_clear
+    66 222C				key
 Macro: KEY [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
-     3 2229 48			         PHA
-     4 222A AD 0F D2		?CK1      LDA SKSTAT
-     5 222D 29 04		         AND #$04
-     6 222F F0 F9		         BEQ ?CK1
-     7 2231 AD 0F D2		?CK       LDA SKSTAT
-     8 2234 29 04		         AND #$04
-     9 2236 D0 F9		         BNE ?CK
-    10 2238 68			         PLA
+     4 222C 48			         PHA
+     5 222D AD 0F D2		?CK1      LDA SKSTAT
+     6 2230 29 04		         AND #$04
+     7 2232 F0 F9		         BEQ ?CK1
+     8 2234 AD 0F D2		?CK       LDA SKSTAT
+     9 2237 29 04		         AND #$04
+    10 2239 D0 F9		         BNE ?CK
+    11 223B 68			         PLA
 Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
-    66 2239 EE 51 22 AD 51 22		inc:lda ntmp
-    67 223F C9 03			cmp #3
-    68 2241 D0 CB			bne lp
-    69 2243 4C 09 22			jmp llp
-    70
+    67 223C EE 54 22 AD 54 22		inc:lda ntmp
+    68 2242 C9 03			cmp #3
+    69 2244 D0 CB			bne lp
+    70 2246 4C 0C 22			jmp llp
     71
-    72 2246				halt 03
+    72
+    73 2249				halt 03
 Macro: HALT [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
-     1 2246			?stop  
-     3 2246 AD 0A D2			      lda RANDOM 
-     4 2249 29 03			      and #03
-     5 224B 8D 1A D0			      sta COLBAK
-     7 224E 4C 46 22		      jmp ?stop
+     1 2249			?stop  
+     3 2249 AD 0A D2			      lda RANDOM 
+     4 224C 29 03			      and #03
+     5 224E 8D 1A D0			      sta COLBAK
+     7 2251 4C 49 22		      jmp ?stop
 Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
-    73 					
-    74 02E0-02E1> 86 21			run start
-    75 2251-2ACB> 00		ntmp .by 0
-    76
-    77 2252				icl 'procs.asm'
+    74 					
+    75 02E0-02E1> 86 21			run start
+    76 2254-2B18> 00		ntmp .by 0
+    77
+    78 2255				icl 'procs.asm'
 Source: C:\jac\wudsn\Workspace\no_internet\procs.asm
      1 				;	@com.wudsn.ide.asm.mainsourcefile=ni.asm
      2
-     3 2252			.proc dino 		; dino to the screen
-     4 					; uses: AXY tmp0 tmp1 tmp2 tmp3
-     5 					; Y - ypos in lines
-     6 					; X - dino phase (0,1,..)
+     3 2255			.proc dl_addr_init ;sets initial values for DL addressess
+     4 					;uses AXY, tmp0, tmp1
+     5 = 0082				_dl = tmp0
+     6 = 0084				_scr = tmp1
      7
-     8 = 0080				_dino = tmp 	; _underscore means pointer here and else
-     9 = 0084				_mask = tmp1    ; local vars for reusing zero page variables
-    10 = 0086				_scr  = tmp2
-    11 = 0088				_back = tmp3
-    12 2252 8C 25 27			sty dino_save_y ;save for clearing
-    13 					; get line address offset
-    14 2255 B9 5C 27			lda scr_addrs_l,y
-    15 2258 85 86			sta _scr
-    16 225A B9 DC 27			lda scr_addrs_h,y
-    17 225D 85 87			sta _scr+1
-    18 					; add x position (hardcoded, dino does not move)
-    19 225F 18 A5 86 69 0A 85 + 	adw _scr #10
-    20 					;was: mwa #screen+10+96*sw scr_ ;10 = xpos, 96 == ypos on the screen
-    21 					
-    22 226A BD D1 26			lda dino_tab_l,x
-    23 226D 85 80			sta _dino
-    24 226F BD D4 26			lda dino_tab_h,x
-    25 2272 85 81			sta _dino+1
-    26
-    27 2274 BD D7 26			lda dino_mask_tab_l,x
-    28 2277 85 84			sta _mask
-    29 2279 BD DA 26			lda dino_mask_tab_h,x
-    30 227C 85 85			sta _mask+1
-    31 					
-    32 227E A9 89 85 84 A9 26 + 	mwa #dino_mask2 _mask
-    33 2286 A9 DD 85 88 A9 26 + 	mwa #dino_back _back
-    34 228E A2 18			ldx #24
-    35 2290			loop1
-    36 2290 A0 00			ldy #0
-    37 2292			dn1	
-    38 2292 B1 86			lda (_scr),y 	; get screen contents
-    39 2294 91 88			sta (_back),y 	; save background for sprite removal
-    40 2296 B1 84			lda (_mask),y  	; mask
-    41 2298 49 FF			eor #$ff 		; inverse, 'cause mads does not inverse OK with '*'
-    42 229A 31 86			and (_scr),y 	; get screen contents
-    43 229C 11 80			ora (_dino),y 
-    44 229E 91 86			sta (_scr),y
-    45 22A0 C8				iny
-    46 22A1 C0 03			cpy #3
-    47 22A3 D0 ED			bne dn1
-    48 22A5 18 A5 80 69 03 85 + 	adw _dino #3
-    49 22B0 18 A5 84 69 03 85 + 	adw _mask #3
-    50 22BB 18 A5 88 69 03 85 + 	adw _back #3
-    51 22C6 18 A5 86 69 80 85 + 	adw _scr #sw
-    52 22D1 CA				dex
-    53 22D2 D0 BC			bne loop1
-    54 22D4 60				rts
-    55 				.endp
-    56 				;----------
-    57 22D5			.proc dino_clear 		; remove old dino
-    58 					; uses: AXY tmp2 tmp3
-    59 = 0086				_scr  = tmp2
-    60 = 0088				_back = tmp3
-    61 22D5 AC 25 27			ldy dino_save_y ;ypos 
-    62 					; get line address offset
-    63 22D8 B9 5C 27			lda scr_addrs_l,y
-    64 22DB 85 86			sta _scr
-    65 22DD B9 DC 27			lda scr_addrs_h,y
-    66 22E0 85 87			sta _scr+1
-    67 					; add x position (hardcoded, dino does not move)
-    68 22E2 18 A5 86 69 0A 85 + 	adw _scr #10
-    69 					;mwa #screen+10+96*sw scr_ ;10 = xpos, 96 == ypos on the screen
-    70 					
-    71 22ED A9 DD 85 88 A9 26 + 	mwa #dino_back _back
-    72 22F5 A2 18			ldx #24
-    73 22F7			loop1
-    74 22F7 A0 00			ldy #0
-    75 22F9			dn1	
-    76 22F9 B1 88			lda (_back),y 	; give back background for sprite removal
-    77 22FB 91 86			sta (_scr),y
-    78 22FD C8				iny
-    79 22FE C0 03			cpy #3
-    80 2300 D0 F7			bne dn1
-    81 2302 18 A5 88 69 03 85 + 	adw _back #3
-    82 230D 18 A5 86 69 80 85 + 	adw _scr #sw
-    83 2318 CA				dex
-    84 2319 D0 DC			bne loop1
-    85 231B 60				rts
-    86 				.endp
-    87 				;----------
-    88 231C			.proc ground 	; ground breaking, i.e. drawing
-    89 					; uses: AXY tmp1 tmp2
-    90 					; X: x on screen in words (2 bytes)
-    91 					; Y: ground tile number (0 - plain ground)
-    92 = 0084				_gnd = tmp1
-    93 = 0086				_scr = tmp2
-    94 					
-    95 231C B9 56 27			lda gnd_tab_l,y
-    96 231F 85 84			sta _gnd
-    97 2321 B9 59 27			lda gnd_tab_h,y
-    98 2324 85 85			sta _gnd+1
-    99 2326 A9 00 85 86 A9 78 + 	mwa #screen+112*sw _scr ;112 is ypos of ground level
-   100 232E 8A				txa
-   101 232F 0A				asl						  ;add X to xpos on screen
-   102 2330 18				clc
-   103 2331 65 86			adc _scr
-   104 2333 85 86			sta _scr
-   105 2335 90 02			scc
-   106 2337 E6 87			inc _scr+1
-   107
-   108 2339 A2 08			ldx #8 ; tile height in bytes
-   109 233B			loop1
-   110 233B A0 00			ldy #0
-   111 233D			@	
-   112 233D B1 84			lda  (_gnd),y
-   113 233F 91 86			sta  (_scr),y
-   114 2341 C8				iny
-   115 2342 C0 02			cpy #2 ; tile width in bytes
-   116 2344 D0 F7			bne @-
-   117 2346 18 A5 84 69 02 85 + 	adw _gnd #2
-   118 2351 18 A5 86 69 80 85 + 	adw _scr #sw 	;next screen line
-   119 235C CA				dex
-   120 235D D0 DC			bne loop1
-   121 					; add some debris below
-   122
-   123 235F A2 06			ldx #6  ; debris height
-   124 2361			loop2
-   125 2361 A0 01			ldy #1
-   126 2363			@
-   127 2363 AD 0A D2			lda RANDOM
-   128 2366 2D 0A D2 2D 0A D2 + :5	AND RANDOM
-   129 2375 91 86			sta (_scr),y
-   130 2377 88				dey
-   131 2378 10 E9			bpl @-
-   132 237A 18 A5 86 69 80 85 + 	adw _scr #sw 	;next screen line
-   133 2385 CA				dex
-   134 2386 10 D9			bpl loop2
-   135 					
-   136 2388 60				rts
-   137 				.endp
-   138 2389			.proc ground_init ;draws first 48 segments of a ground
-   139 2389 A9 00 85 80			mva #0 tmp
-   140 238D			ground_loop
-   141 238D A5 80			lda tmp
-   142 238F AA				tax
-   143 2390				randomize 0 2 3
+     8 2255 A9 04 85 82 A9 20 + 	mwa #dl_addrs+1 _dl
+     9 225D A9 00 85 84 A9 40 + 	mwa #screen _scr
+    10
+    11 2265 A2 80			ldx #sh
+    12 2267 A0 00		@	ldy #0
+    13 2269 A5 84			lda _scr
+    14 226B 91 82			sta (_dl),y
+    15 226D A5 85			lda _scr+1
+    16 226F C8				iny
+    17 2270 91 82			sta (_dl),y
+    18 2272 18 A5 82 69 03 85 + 	adw _dl #3
+    19 227D 18 A5 84 69 80 85 + 	adw _scr #sw
+    20 2288 CA				dex
+    21 2289 D0 DC			bne @-
+    22 228B 60				rts
+    23 				.endp
+    24
+    25 228C			.proc dino 		; dino to the screen
+    26 					; uses: AXY tmp0 tmp1 tmp2 tmp3
+    27 					; Y - ypos in lines
+    28 					; X - dino phase (0,1,..)
+    29
+    30 = 0080				_dino = tmp 	; _underscore means pointer here and else
+    31 = 0084				_mask = tmp1    ; local vars for reusing zero page variables
+    32 = 0086				_scr  = tmp2
+    33 = 0088				_back = tmp3
+    34 228C 8C 72 27			sty dino_save_y ;save for clearing
+    35 					; get line address offset
+    36 228F B9 A9 27			lda scr_addrs_l,y
+    37 2292 85 86			sta _scr
+    38 2294 B9 29 28			lda scr_addrs_h,y
+    39 2297 85 87			sta _scr+1
+    40 					; add x position (hardcoded, dino does not move)
+    41 2299 18 A5 86 69 0A 85 + 	adw _scr #10
+    42 					;was: mwa #screen+10+96*sw scr_ ;10 = xpos, 96 == ypos on the screen
+    43 					
+    44 22A4 BD 1E 27			lda dino_tab_l,x
+    45 22A7 85 80			sta _dino
+    46 22A9 BD 21 27			lda dino_tab_h,x
+    47 22AC 85 81			sta _dino+1
+    48
+    49 22AE BD 24 27			lda dino_mask_tab_l,x
+    50 22B1 85 84			sta _mask
+    51 22B3 BD 27 27			lda dino_mask_tab_h,x
+    52 22B6 85 85			sta _mask+1
+    53 					
+    54 22B8 A9 D6 85 84 A9 26 + 	mwa #dino_mask2 _mask
+    55 22C0 A9 2A 85 88 A9 27 + 	mwa #dino_back _back
+    56 22C8 A2 18			ldx #24
+    57 22CA			loop1
+    58 22CA A0 00			ldy #0
+    59 22CC			dn1	
+    60 22CC B1 86			lda (_scr),y 	; get screen contents
+    61 22CE 91 88			sta (_back),y 	; save background for sprite removal
+    62 22D0 B1 84			lda (_mask),y  	; mask
+    63 22D2 49 FF			eor #$ff 		; inverse, 'cause mads does not inverse OK with '*'
+    64 22D4 31 86			and (_scr),y 	; get screen contents
+    65 22D6 11 80			ora (_dino),y 
+    66 22D8 91 86			sta (_scr),y
+    67 22DA C8				iny
+    68 22DB C0 03			cpy #3
+    69 22DD D0 ED			bne dn1
+    70 22DF 18 A5 80 69 03 85 + 	adw _dino #3
+    71 22EA 18 A5 84 69 03 85 + 	adw _mask #3
+    72 22F5 18 A5 88 69 03 85 + 	adw _back #3
+    73 2300 18 A5 86 69 80 85 + 	adw _scr #sw
+    74 230B CA				dex
+    75 230C D0 BC			bne loop1
+    76 230E 60				rts
+    77 				.endp
+    78 				;----------
+    79 230F			.proc dino_clear 		; remove old dino
+    80 					; uses: AXY tmp2 tmp3
+    81 = 0086				_scr  = tmp2
+    82 = 0088				_back = tmp3
+    83 230F AC 72 27			ldy dino_save_y ;ypos 
+    84 					; get line address offset
+    85 2312 B9 A9 27			lda scr_addrs_l,y
+    86 2315 85 86			sta _scr
+    87 2317 B9 29 28			lda scr_addrs_h,y
+    88 231A 85 87			sta _scr+1
+    89 					; add x position (hardcoded, dino does not move)
+    90 231C 18 A5 86 69 0A 85 + 	adw _scr #10
+    91 					;mwa #screen+10+96*sw scr_ ;10 = xpos, 96 == ypos on the screen
+    92 					
+    93 2327 A9 2A 85 88 A9 27 + 	mwa #dino_back _back
+    94 232F A2 18			ldx #24
+    95 2331			loop1
+    96 2331 A0 00			ldy #0
+    97 2333			dn1	
+    98 2333 B1 88			lda (_back),y 	; give back background for sprite removal
+    99 2335 91 86			sta (_scr),y
+   100 2337 C8				iny
+   101 2338 C0 03			cpy #3
+   102 233A D0 F7			bne dn1
+   103 233C 18 A5 88 69 03 85 + 	adw _back #3
+   104 2347 18 A5 86 69 80 85 + 	adw _scr #sw
+   105 2352 CA				dex
+   106 2353 D0 DC			bne loop1
+   107 2355 60				rts
+   108 				.endp
+   109 				;----------
+   110 2356			.proc ground 	; ground breaking, i.e. drawing
+   111 					; uses: AXY tmp1 tmp2
+   112 					; X: x on screen in words (2 bytes)
+   113 					; Y: ground tile number (0 - plain ground)
+   114 = 0084				_gnd = tmp1
+   115 = 0086				_scr = tmp2
+   116 					
+   117 2356 B9 A3 27			lda gnd_tab_l,y
+   118 2359 85 84			sta _gnd
+   119 235B B9 A6 27			lda gnd_tab_h,y
+   120 235E 85 85			sta _gnd+1
+   121 2360 A9 00 85 86 A9 78 + 	mwa #screen+112*sw _scr ;112 is ypos of ground level
+   122 2368 8A				txa
+   123 2369 0A				asl						  ;add X to xpos on screen
+   124 236A 18				clc
+   125 236B 65 86			adc _scr
+   126 236D 85 86			sta _scr
+   127 236F 90 02			scc
+   128 2371 E6 87			inc _scr+1
+   129
+   130 2373 A2 08			ldx #8 ; tile height in bytes
+   131 2375			loop1
+   132 2375 A0 00			ldy #0
+   133 2377			@	
+   134 2377 B1 84			lda  (_gnd),y
+   135 2379 91 86			sta  (_scr),y
+   136 237B C8				iny
+   137 237C C0 02			cpy #2 ; tile width in bytes
+   138 237E D0 F7			bne @-
+   139 2380 18 A5 84 69 02 85 + 	adw _gnd #2
+   140 238B 18 A5 86 69 80 85 + 	adw _scr #sw 	;next screen line
+   141 2396 CA				dex
+   142 2397 D0 DC			bne loop1
+   143 					; add some debris below
+   144
+   145 2399 A2 06			ldx #6  ; debris height
+   146 239B			loop2
+   147 239B A0 01			ldy #1
+   148 239D			@
+   149 239D AD 0A D2			lda RANDOM
+   150 23A0 2D 0A D2 2D 0A D2 + :5	AND RANDOM
+   151 23AF 91 86			sta (_scr),y
+   152 23B1 88				dey
+   153 23B2 10 E9			bpl @-
+   154 23B4 18 A5 86 69 80 85 + 	adw _scr #sw 	;next screen line
+   155 23BF CA				dex
+   156 23C0 10 D9			bpl loop2
+   157 					
+   158 23C2 60				rts
+   159 				.endp
+   160 23C3			.proc ground_init ;draws first 48 segments of a ground
+   161 23C3 A9 00 85 80			mva #0 tmp
+   162 23C7			ground_loop
+   163 23C7 A5 80			lda tmp
+   164 23C9 AA				tax
+   165 23CA				randomize 0 2 3
 Macro: RANDOMIZE [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
-     4 2390			?rand
-     5 2390 AD 0A D2		      lda random
-     7 2393 29 03		      	and #3
-     9 2395 C9 00		      cmp #0 		;floor
-    10 2397 90 F7		      bcc ?rand
-    11 2399 C9 03		      cmp #2+1 	;ceiling
-    12 239B B0 F3		      bcs ?rand
+     4 23CA			?rand
+     5 23CA AD 0A D2		      lda random
+     7 23CD 29 03		      	and #3
+     9 23CF C9 00		      cmp #0 		;floor
+    10 23D1 90 F7		      bcc ?rand
+    11 23D3 C9 03		      cmp #2+1 	;ceiling
+    12 23D5 B0 F3		      bcs ?rand
 Source: C:\jac\wudsn\Workspace\no_internet\procs.asm
-   144 239D A8				tay
-   145 239E 20 1C 23			jsr ground
-   146 23A1 E6 80			inc tmp
-   147 23A3 A5 80			lda tmp
-   148 23A5 C9 18			cmp #24  ; screen width in wide mode /2 
-   149 23A7 D0 E4			bne ground_loop
-   150 23A9 60				rts
-   151 				.endp
-   152 				;----------
-   153 23AA			.proc cactus 	; drawing cactii
-   154 					; uses: AXY tmp1 tmp2
-   155 					; X: x on screen in bytes
-   156 					; Y: cactus number
-   157 					; draws from bottom up, utilising the fact that .bmp is saved this way
-   158 				    ; updt.: was not able to load .bmp files for unknown reason, so the pics are flipped with WUDSN script
-   159 					
-   160 = 0084				_cact = tmp1
-   161 = 0086				_scr = tmp2
-   162 					
-   163 23AA B9 C6 2A			lda cact_tab_l,y
-   164 23AD 85 84			sta _cact
-   165 23AF B9 C9 2A			lda cact_tab_h,y
-   166 23B2 85 85			sta _cact+1
-   167 23B4 A9 00 85 86 A9 7D + 	mwa #screen+122*sw _scr ;112 is ypos of bottom of the cactii
-   168 23BC 8A				txa
-   169 23BD 18				clc
-   170 23BE 65 86			adc _scr
-   171 23C0 85 86			sta _scr
-   172 23C2 90 02			bcc no_inc
-   173 23C4 E6 87			inc _scr+1
-   174 23C6			no_inc
-   175
-   176 					
-   177 23C6 B9 C0 2A			lda cact_widths,y
-   178 23C9 8D F9 23			sta cact_w ; width in bytes
-   179
-   180 23CC B9 C3 2A			lda cact_heights,y
-   181 23CF AA				tax
-   182 23D0			loop
-   183 23D0 A0 00			ldy #0
-   184 23D2			@
-   185 23D2 B1 86			lda  (_scr),y
-   186 23D4 11 84			ora  (_cact),y
-   187 23D6 91 86			sta  (_scr),y
-   188 23D8 C8				iny
-   189 23D9 CC F9 23			cpy cact_w 
-   190 23DC D0 F4			bne @-
-   191 					;adw _cact cact_w  ;!!!DOES NOT WORK :(((((
-   192 23DE 18				clc
-   193 23DF AD F9 23			lda cact_w
-   194 23E2 65 84			adc _cact
-   195 23E4 85 84			sta _cact
-   196 23E6 90 02			scc
-   197 23E8 E6 85			inc _cact+1
+   166 23D7 A8				tay
+   167 23D8 20 56 23			jsr ground
+   168 23DB E6 80			inc tmp
+   169 23DD A5 80			lda tmp
+   170 23DF C9 18			cmp #24  ; screen width in wide mode /2 
+   171 23E1 D0 E4			bne ground_loop
+   172 23E3 60				rts
+   173 				.endp
+   174 				;----------
+   175 23E4			.proc cactus 	; drawing cactii
+   176 					; uses: AXY tmp1 tmp2
+   177 					; X: x on screen in bytes
+   178 					; Y: cactus number
+   179 					; draws from bottom up, utilising the fact that .bmp is saved this way
+   180 				    ; updt.: was not able to load .bmp files for unknown reason, so the pics are flipped with WUDSN script
+   181 					
+   182 = 0084				_cact = tmp1
+   183 = 0086				_scr = tmp2
+   184 					
+   185 23E4 B9 13 2B			lda cact_tab_l,y
+   186 23E7 85 84			sta _cact
+   187 23E9 B9 16 2B			lda cact_tab_h,y
+   188 23EC 85 85			sta _cact+1
+   189 23EE A9 00 85 86 A9 7D + 	mwa #screen+122*sw _scr ;112 is ypos of bottom of the cactii
+   190 23F6 8A				txa
+   191 23F7 18				clc
+   192 23F8 65 86			adc _scr
+   193 23FA 85 86			sta _scr
+   194 23FC 90 02			bcc no_inc
+   195 23FE E6 87			inc _scr+1
+   196 2400			no_inc
+   197
    198 					
-   199 23EA 38 A5 86 E9 80 85 + 	sbw _scr #sw 
-   200 23F5 CA				dex
-   201 23F6 D0 D8			bne loop
-   202 23F8 60				rts
-   203 23F9 00			cact_w .by 0
-   204 				.endp
-   205 				;----------
-   206
-   207 23FA			.proc sprites_init
-   208 				;setting up P/M graphics
-   209 23FA A9 90		    lda #>pmgraph
-   210 23FC 8D 07 D4		    sta pmbase
-   211 23FF AD 2F 02		    lda dmactls
-   212 2402 09 0C		    ora #%00001100    ; Players and Missiles single lined
-   213 2404 8D 2F 02		    sta dmactls
-   214 2407 A9 03		    lda #$03    ; P/M on
-   215 2409 8D 1D D0		    sta pmcntl
-   216 240C A9 00		    lda #$00
-   217 240E 8D 0C D0		    sta sizem ; there will be only M0, double width
-   218 2411 8D 08 D0		    sta sizep0 ; P0-P3 widths
-   219 2414 8D 09 D0		    sta sizep0+1
-   220 2417 8D 0A D0		    sta sizep0+2
-   221 241A 8D 0B D0		    sta sizep0+3
-   222 241D A9 11		    lda #$11 ; P/M priorities (bit 4 joins missiles), bit 0 - players on top
-   223 241F 8D 6F 02		    sta gtictls
-   224 				    /*
-   225 				    ; temporary colours of sprites
-   226 				    mva #$52 COLPM0
-   227 					mva #$34 COLPM1
-   228 				    mva #$76 COLPM2
-   229 				    mva #$90 COLPM3
-   230 				    mva #$B0 COLPF3S
-   231 				    */
-   231
-   232 = 002A				dx = 42
-   233 2422 A9 2A 8D 00 D0		mva #dx HPOSP0
-   234 2427 A9 32 8D 01 D0		mva #dx+8 HPOSP1
-   235 242C A9 3A 8D 02 D0		MVA #dx+8*2 HPOSP2
-   236
-   237 2431 60				rts
-   238 				.endp
-   239
-   240 2432			.proc dino_pm
-   241 					; uses: AXY tmp tmp1 tmp2 tmp3
-   242 					; X: dino animation phase
-   243 					; Y: Y position of dino
-   244 					
-   245 = 0084				_dino = tmp1 	 	; _underscore means pointer here and else
-   246 = 0086				_dino_sav = tmp2 	; local vars for reusing zero page variables
-   247 = 0088				_spr  = tmp3
-   248 					;tmp = tmp
-   249 					
-   250 2432 AD E1 24 8D E2 24		mva dino_save_pm_y dino_save_pm_y_prev
-   251 2438 8C E1 24			sty dino_save_pm_y 	;save for clearing
-   252
+   199 2400 B9 0D 2B			lda cact_widths,y
+   200 2403 8D 33 24			sta cact_w ; width in bytes
+   201
+   202 2406 B9 10 2B			lda cact_heights,y
+   203 2409 AA				tax
+   204 240A			loop
+   205 240A A0 00			ldy #0
+   206 240C			@
+   207 240C B1 86			lda  (_scr),y
+   208 240E 11 84			ora  (_cact),y
+   209 2410 91 86			sta  (_scr),y
+   210 2412 C8				iny
+   211 2413 CC 33 24			cpy cact_w 
+   212 2416 D0 F4			bne @-
+   213 					;adw _cact cact_w  ;!!!DOES NOT WORK :(((((
+   214 2418 18				clc
+   215 2419 AD 33 24			lda cact_w
+   216 241C 65 84			adc _cact
+   217 241E 85 84			sta _cact
+   218 2420 90 02			scc
+   219 2422 E6 85			inc _cact+1
+   220 					
+   221 2424 38 A5 86 E9 80 85 + 	sbw _scr #sw 
+   222 242F CA				dex
+   223 2430 D0 D8			bne loop
+   224 2432 60				rts
+   225 2433 00			cact_w .by 0
+   226 				.endp
+   227 				;----------
+   228
+   229 2434			.proc sprites_init
+   230 				;setting up P/M graphics
+   231 2434 A9 90		    lda #>pmgraph
+   232 2436 8D 07 D4		    sta pmbase
+   233 2439 AD 2F 02		    lda dmactls
+   234 243C 09 0C		    ora #%00001100    ; Players and Missiles single lined
+   235 243E 8D 2F 02		    sta dmactls
+   236 2441 A9 03		    lda #$03    ; P/M on
+   237 2443 8D 1D D0		    sta pmcntl
+   238 2446 A9 00		    lda #$00
+   239 2448 8D 0C D0		    sta sizem ; there will be only M0, double width
+   240 244B 8D 08 D0		    sta sizep0 ; P0-P3 widths
+   241 244E 8D 09 D0		    sta sizep0+1
+   242 2451 8D 0A D0		    sta sizep0+2
+   243 2454 8D 0B D0		    sta sizep0+3
+   244 2457 A9 11		    lda #$11 ; P/M priorities (bit 4 joins missiles), bit 0 - players on top
+   245 2459 8D 6F 02		    sta gtictls
+   246 				    /*
+   247 				    ; temporary colours of sprites
+   248 				    mva #$52 COLPM0
+   249 					mva #$34 COLPM1
+   250 				    mva #$76 COLPM2
+   251 				    mva #$90 COLPM3
+   252 				    mva #$B0 COLPF3S
+   253 				    */
    253
-   254 243B BD D1 26			lda dino_tab_l,x
-   255 					;sta _dino
-   256 243E 85 86			sta _dino_sav
-   257 2440 BD D4 26			lda dino_tab_h,x
-   258 					;sta _dino+1
-   259 2443 85 87			sta _dino_sav+1
-   260
-   261 					
-   262 2445 A9 00 8D E0 24		mva #0 counter
-   263
-   264 244A			loop0
-   265 					; sprite address calc
-   266 244A A9 00 85 88 A9 92 + 	mwa #(pmgraph+$200) _spr   	;1st sprite starts at PMBASE + $200
-   267 												;counter *$80	
-   268 2452 A9 80 85 80 A9 FF + 	mwa #-$80 tmp				;so first add gives "0"
-   269 245A AC E0 24			ldy counter
-   270 245D			@
-   271 245D 18 A5 80 69 80 85 + 	adw tmp #$80				;tmp = counter*$80 - calc addr of the sprite to put gfx
-   272 2468 88				dey
-   273 2469 10 F2			bpl @-
-   274 					
-   275 246B 18 A5 88 65 80 85 + 	adw _spr tmp
-   276 2478 A5 88 85 80 A5 89 + 	mwa _spr tmp ; save address - it will be used in clearing and then drawing
-   277
-   278 2480 AD E2 24			lda dino_save_pm_y_prev		;clearing old sprite, same way as drawing a new one
-   279 2483 18				clc 						;add ypos to the sprite address
-   280 2484 65 88			adc _spr
-   281 2486 85 88			sta _spr
-   282 					;scc
-   283 					;inc _spr+1					;not necessary, sprites are not crossing pages
-   284
-   285 2488 A0 00			ldy #0						;delete old sprite here
-   286 248A 98				tya
-   287 248B A2 18			ldx #24 	;dino height
-   288 248D			@
-   289 248D 91 88			sta (_spr),y
-   290 248F C8				iny
-   291 2490 CA				dex
-   292 2491 D0 FA			bne @-
-   293
-   294
-   295 					
-   296 					;--------------------------
-   297 2493 A5 80 85 88 A5 81 + 	mwa tmp _spr
-   298 249B AD E1 24			lda dino_save_pm_y			;drawing sprite at a new position
-   299 249E 18				clc 						;add ypos to the sprite address
-   300 249F 65 88			adc _spr
-   301 24A1 85 88			sta _spr
-   302 					;scc
-   303 					;inc _spr+1					;not necessary, sprites are not crossing pages
-   304
-   305
-   306 24A3 18				clc				;beginning of the next column of dino to the sprite
-   307 24A4 A5 86			lda _dino_sav	;0- first column, 1 - 2nd, 2 - 3rd
-   308 24A6 6D E0 24			adc counter
-   309 24A9 85 84			sta _dino
-   310 					;bcc @+			;needs to be removed as both bytes must be copied
-   311 24AB A5 87			lda _dino_sav+1	;original address
-   312 24AD 69 00			adc #0
-   313 24AF 85 85			sta _dino+1		
-   314 				;@
-   315 					
-   316 24B1 A0 00			ldy #0
+   254 = 002A				dx = 42
+   255 245C A9 2A 8D 00 D0		mva #dx HPOSP0
+   256 2461 A9 32 8D 01 D0		mva #dx+8 HPOSP1
+   257 2466 A9 3A 8D 02 D0		MVA #dx+8*2 HPOSP2
+   258
+   259 246B 60				rts
+   260 				.endp
+   261
+   262 246C			.proc dino_pm
+   263 					; uses: AXY tmp tmp1 tmp2 tmp3
+   264 					; X: dino animation phase
+   265 					; Y: Y position of dino
+   266 					
+   267 = 0084				_dino = tmp1 	 	; _underscore means pointer here and else
+   268 = 0086				_dino_sav = tmp2 	; local vars for reusing zero page variables
+   269 = 0088				_spr  = tmp3
+   270 					;tmp = tmp
+   271 					
+   272 246C AD 1B 25 8D 1C 25		mva dino_save_pm_y dino_save_pm_y_prev
+   273 2472 8C 1B 25			sty dino_save_pm_y 	;save for clearing
+   274
+   275
+   276 2475 BD 1E 27			lda dino_tab_l,x
+   277 					;sta _dino
+   278 2478 85 86			sta _dino_sav
+   279 247A BD 21 27			lda dino_tab_h,x
+   280 					;sta _dino+1
+   281 247D 85 87			sta _dino_sav+1
+   282
+   283 					
+   284 247F A9 00 8D 1A 25		mva #0 counter
+   285
+   286 2484			loop0
+   287 					; sprite address calc
+   288 2484 A9 00 85 88 A9 92 + 	mwa #(pmgraph+$200) _spr   	;1st sprite starts at PMBASE + $200
+   289 												;counter *$80	
+   290 248C A9 80 85 80 A9 FF + 	mwa #-$80 tmp				;so first add gives "0"
+   291 2494 AC 1A 25			ldy counter
+   292 2497			@
+   293 2497 18 A5 80 69 80 85 + 	adw tmp #$80				;tmp = counter*$80 - calc addr of the sprite to put gfx
+   294 24A2 88				dey
+   295 24A3 10 F2			bpl @-
+   296 					
+   297 24A5 18 A5 88 65 80 85 + 	adw _spr tmp
+   298 24B2 A5 88 85 80 A5 89 + 	mwa _spr tmp ; save address - it will be used in clearing and then drawing
+   299
+   300 24BA AD 1C 25			lda dino_save_pm_y_prev		;clearing old sprite, same way as drawing a new one
+   301 24BD 18				clc 						;add ypos to the sprite address
+   302 24BE 65 88			adc _spr
+   303 24C0 85 88			sta _spr
+   304 					;scc
+   305 					;inc _spr+1					;not necessary, sprites are not crossing pages
+   306
+   307 24C2 A0 00			ldy #0						;delete old sprite here
+   308 24C4 98				tya
+   309 24C5 A2 18			ldx #24 	;dino height
+   310 24C7			@
+   311 24C7 91 88			sta (_spr),y
+   312 24C9 C8				iny
+   313 24CA CA				dex
+   314 24CB D0 FA			bne @-
+   315
+   316
    317 					
-   318 24B3 A2 18			ldx #24 	;dino height
-   319 24B5			@
-   320 24B5 B1 84			lda (_dino),y
-   321 24B7 91 88			sta (_spr),y
-   322 24B9 18 A5 84 69 03 85 + 	adw _dino #3	;+3 ==> next line in dino
-   323 24C4 18 A5 88 69 01 85 + 	adw _spr #1
-   324 24CF CA				dex
-   325 24D0 D0 E3			bne @-
-   326 					
-   327 					
-   328 					
-   329 24D2 EE E0 24 AD E0 24		inc:lda counter
-   330 24D8 C9 03			cmp #3
-   331 24DA F0 03 4C 4A 24		jne loop0
-   332
-   333 					
-   334 					
-   335 24DF 60				rts
-   336 24E0 00			counter 			.by 0
-   337 24E1 00			dino_save_pm_y		.by 0
-   338 24E2 00			dino_save_pm_y_prev	.by 0
-   339
-   340 				.endp
-   341
-   342 24E3			.proc move_dl ;screen window one byte right
-   343 					;uses: AXY
-   344
-   345 24E3 A9 04 8D F0 24 A9 + 	mwa #dl_addrs+1 incr+1 ;self mod
-   346 24ED A2 80			ldx #sh
-   347 24EF EE FF FF		incr	inc $ffff
-   348 24F2 18 AD F0 24 69 03 + 	adw incr+1 #3
-   349 2500 CA				dex
-   350 2501 D0 EC			bne incr
-   351 2503 60				rts
-   352 				.endp
-   353
-   354 2504			.proc move_scr ;screen window one step (1/4 th of byte) right
-   355 2504 CE 20 25 AD 20 25		dec:lda hscr_state
-   356 250A 8D 04 D4			sta HSCROL
-   357 250D C9 04			cmp #4
-   358 250F D0 0E			bne @+
-   359 2511 A9 0C 8D 20 25		mva #12 hscr_state
-   360 2516 8D 04 D4			sta HSCROL
-   361 2519 20 E3 24			jsr move_dl
-   362 251C 20 E3 24			jsr move_dl
-   363 251F			@	
-   364 251F 60				rts
-   365 2520 00			hscr_state 	.by 0
-   366 				.endp
-    78 2521				icl 'artwork.asm'
+   318 					;--------------------------
+   319 24CD A5 80 85 88 A5 81 + 	mwa tmp _spr
+   320 24D5 AD 1B 25			lda dino_save_pm_y			;drawing sprite at a new position
+   321 24D8 18				clc 						;add ypos to the sprite address
+   322 24D9 65 88			adc _spr
+   323 24DB 85 88			sta _spr
+   324 					;scc
+   325 					;inc _spr+1					;not necessary, sprites are not crossing pages
+   326
+   327
+   328 24DD 18				clc				;beginning of the next column of dino to the sprite
+   329 24DE A5 86			lda _dino_sav	;0- first column, 1 - 2nd, 2 - 3rd
+   330 24E0 6D 1A 25			adc counter
+   331 24E3 85 84			sta _dino
+   332 					;bcc @+			;needs to be removed as both bytes must be copied
+   333 24E5 A5 87			lda _dino_sav+1	;original address
+   334 24E7 69 00			adc #0
+   335 24E9 85 85			sta _dino+1		
+   336 				;@
+   337 					
+   338 24EB A0 00			ldy #0
+   339 					
+   340 24ED A2 18			ldx #24 	;dino height
+   341 24EF			@
+   342 24EF B1 84			lda (_dino),y
+   343 24F1 91 88			sta (_spr),y
+   344 24F3 18 A5 84 69 03 85 + 	adw _dino #3	;+3 ==> next line in dino
+   345 24FE 18 A5 88 69 01 85 + 	adw _spr #1
+   346 2509 CA				dex
+   347 250A D0 E3			bne @-
+   348 					
+   349 					
+   350 					
+   351 250C EE 1A 25 AD 1A 25		inc:lda counter
+   352 2512 C9 03			cmp #3
+   353 2514 F0 03 4C 84 24		jne loop0
+   354
+   355 					
+   356 					
+   357 2519 60				rts
+   358 251A 00			counter 			.by 0
+   359 251B 00			dino_save_pm_y		.by 0
+   360 251C 00			dino_save_pm_y_prev	.by 0
+   361
+   362 				.endp
+   363
+   364 251D			.proc move_dl ;screen window one byte right
+   365 					;uses: AXY
+   366
+   367 251D EE 50 25 AD 50 25		inc:lda x_scr_offset
+   368 2523 C9 41			cmp #sw_log+1 ; is it end of the logical 2 screens?
+   369 2525 D0 08			bne @+
+   370 					;start anew
+   371 2527 A9 00 8D 50 25		mva #0 x_scr_offset
+   372 252C 20 55 22			jsr dl_addr_init
+   373 252F			@
+   374 252F A9 04 8D 3C 25 A9 + 	mwa #dl_addrs+1 incr+1 ;self mod
+   375 2539 A2 80			ldx #sh
+   376 253B EE FF FF		incr	inc $ffff
+   377 253E 18 AD 3C 25 69 03 + 	adw incr+1 #3
+   378 254C CA				dex
+   379 254D D0 EC			bne incr
+   380 254F 60				rts
+   381 				.endp
+   382 2550 00			x_scr_offset .by 0 ;where is the beginning of the screen
+   383
+   384 2551			.proc move_scr ;screen window one step (1/4 th of byte) right
+   385 					;uses: AXY
+   386 2551 CE 6D 25 AD 6D 25		dec:lda hscr_state
+   387 2557 8D 04 D4			sta HSCROL
+   388 255A C9 04			cmp #4
+   389 255C D0 0E			bne @+
+   390 255E A9 0C 8D 6D 25		mva #12 hscr_state
+   391 2563 8D 04 D4			sta HSCROL
+   392 2566 20 1D 25			jsr move_dl
+   393 2569 20 1D 25			jsr move_dl
+   394 256C			@	
+   395 256C 60				rts
+   396 256D 00			hscr_state 	.by 0
+   397 				.endp
+    79 256E				icl 'artwork.asm'
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
      1 				;	@com.wudsn.ide.asm.mainsourcefile=ni.asm
      2 				;-------------------------------------------------------------
@@ -1413,12 +1446,12 @@ Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
      7 					.ENDR
      7 					.endr
 Source: REPT
-     5 2521			DINO0 
-     5 2521 00 00 00 00 03 FC + 	INS 'art/dino0.data'
-     5 2569			DINO1 
-     5 2569 00 00 00 00 03 FC + 	INS 'art/dino1.data'
-     5 25B1			DINO2 
-     5 25B1 00 00 00 00 03 FC + 	INS 'art/dino2.data'
+     5 256E			DINO0 
+     5 256E 00 00 00 00 03 FC + 	INS 'art/dino0.data'
+     5 25B6			DINO1 
+     5 25B6 00 00 00 00 03 FC + 	INS 'art/dino1.data'
+     5 25FE			DINO2 
+     5 25FE 00 00 00 00 03 FC + 	INS 'art/dino2.data'
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
      8
      9 					.rept 3, #
@@ -1427,59 +1460,59 @@ Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
     12 					.ENDR
     12 					.endr
 Source: REPT
-    10 25F9			DINO_MASK0 
-    10 25F9 FF F8 01 FF F0 00 + 	INS 'art/dino_mask0.data'
-    10 2641			DINO_MASK1 
-    10 2641 FF F8 01 FF F0 00 + 	INS 'art/dino_mask1.data'
-    10 2689			DINO_MASK2 
-    10 2689 00 07 FE 00 0F FF + 	INS 'art/dino_mask2.data'
+    10 2646			DINO_MASK0 
+    10 2646 FF F8 01 FF F0 00 + 	INS 'art/dino_mask0.data'
+    10 268E			DINO_MASK1 
+    10 268E FF F8 01 FF F0 00 + 	INS 'art/dino_mask1.data'
+    10 26D6			DINO_MASK2 
+    10 26D6 00 07 FE 00 0F FF + 	INS 'art/dino_mask2.data'
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
     13
-    14 26D1			dino_tab_l
+    14 271E			dino_tab_l
     15 					.rept 3, #
     16 						.BY <DINO:1
     17 					.ENDR
     17 					.endr
 Source: REPT
-    16 26D1 21					.BY <DINO0
-    16 26D2 69					.BY <DINO1
-    16 26D3 B1					.BY <DINO2
+    16 271E 6E					.BY <DINO0
+    16 271F B6					.BY <DINO1
+    16 2720 FE					.BY <DINO2
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
-    18 26D4			dino_tab_h
+    18 2721			dino_tab_h
     19 					.rept 3, #
     20 						.BY >DINO:1
     21 					.ENDR
     21 					.endr
 Source: REPT
-    20 26D4 25					.BY >DINO0
-    20 26D5 25					.BY >DINO1
-    20 26D6 25					.BY >DINO2
+    20 2721 25					.BY >DINO0
+    20 2722 25					.BY >DINO1
+    20 2723 25					.BY >DINO2
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
     22
-    23 26D7			dino_mask_tab_l
+    23 2724			dino_mask_tab_l
     24 					.rept 3, #
     25 						.BY <DINO_MASK:1
     26 					.ENDR
     26 					.endr
 Source: REPT
-    25 26D7 F9					.BY <DINO_MASK0
-    25 26D8 41					.BY <DINO_MASK1
-    25 26D9 89					.BY <DINO_MASK2
+    25 2724 46					.BY <DINO_MASK0
+    25 2725 8E					.BY <DINO_MASK1
+    25 2726 D6					.BY <DINO_MASK2
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
-    27 26DA			dino_mask_tab_h
+    27 2727			dino_mask_tab_h
     28 					.rept 3, #
     29 						.BY >DINO_MASK:1
     30 					.ENDR
     30 					.endr
 Source: REPT
-    29 26DA 25					.BY >DINO_MASK0
-    29 26DB 26					.BY >DINO_MASK1
-    29 26DC 26					.BY >DINO_MASK2
+    29 2727 26					.BY >DINO_MASK0
+    29 2728 26					.BY >DINO_MASK1
+    29 2729 26					.BY >DINO_MASK2
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
     31
-    32 26DD			dino_back ; background save for dino sprite
-    33 26DD 00 00 00 00 00 00 + :3*24 			.by 0
-    34 2725 00			dino_save_y		.by 0
+    32 272A			dino_back ; background save for dino sprite
+    33 272A 00 00 00 00 00 00 + :3*24 			.by 0
+    34 2772 00			dino_save_y		.by 0
     35
     36 				;------------------------------
     37 				; ground pictures, 8x16 px = 2x1 chars (2x8 bytes)
@@ -1489,37 +1522,37 @@ Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
     41 					.ENDR
     41 					.endr
 Source: REPT
-    39 2726			GND_0
-    39 2726 00 00 00 00 00 00 + 	INS 'art/gnd_0.data'
-    39 2736			GND_1
-    39 2736 03 F0 06 18 1C 0C + 	INS 'art/gnd_1.data'
-    39 2746			GND_2
-    39 2746 00 00 00 00 00 00 + 	INS 'art/gnd_2.data'
+    39 2773			GND_0
+    39 2773 00 00 00 00 00 00 + 	INS 'art/gnd_0.data'
+    39 2783			GND_1
+    39 2783 03 F0 06 18 1C 0C + 	INS 'art/gnd_1.data'
+    39 2793			GND_2
+    39 2793 00 00 00 00 00 00 + 	INS 'art/gnd_2.data'
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
-    42 2756			gnd_tab_l
+    42 27A3			gnd_tab_l
     43 					.rept 3, #
     44 						.BY <GND_:1
     45 					.ENDR
     45 					.endr
 Source: REPT
-    44 2756 26					.BY <GND_0
-    44 2757 36					.BY <GND_1
-    44 2758 46					.BY <GND_2
+    44 27A3 73					.BY <GND_0
+    44 27A4 83					.BY <GND_1
+    44 27A5 93					.BY <GND_2
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
-    46 2759			gnd_tab_h
+    46 27A6			gnd_tab_h
     47 					.rept 3, #
     48 						.BY >GND_:1
     49 					.ENDR
     49 					.endr
 Source: REPT
-    48 2759 27					.BY >GND_0
-    48 275A 27					.BY >GND_1
-    48 275B 27					.BY >GND_2
+    48 27A6 27					.BY >GND_0
+    48 27A7 27					.BY >GND_1
+    48 27A8 27					.BY >GND_2
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
-    50 275C			scr_addrs_l
-    51 275C 00 80 00 80 00 80 + :sh		.by <(screen+#*sw)
-    52 27DC			scr_addrs_h
-    53 27DC 40 40 41 41 42 42 + :sh		.by >(screen+#*sw)
+    50 27A9			scr_addrs_l
+    51 27A9 00 80 00 80 00 80 + :sh		.by <(screen+#*sw)
+    52 2829			scr_addrs_h
+    53 2829 40 40 41 41 42 42 + :sh		.by >(screen+#*sw)
     54 				;------------------------------
     55 				; cacti pictures, height and width variable
     56 				; cactX.data is flipped vertically
@@ -1531,36 +1564,36 @@ Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
     62 					.ENDR
     62 					.endr
 Source: REPT
-    60 285C			CACT0
-    60 285C 00 00 00 00 03 E0 + 	INS 'art/cact0.data'
-    60 28E8			CACT1
-    60 28E8 00 00 00 00 00 7F + 	INS 'art/cact1.data'
-    60 29A8			CACT2
-    60 29A8 00 00 00 00 00 00 + 	INS 'art/cact2.data'
+    60 28A9			CACT0
+    60 28A9 00 00 00 00 03 E0 + 	INS 'art/cact0.data'
+    60 2935			CACT1
+    60 2935 00 00 00 00 00 7F + 	INS 'art/cact1.data'
+    60 29F5			CACT2
+    60 29F5 00 00 00 00 00 00 + 	INS 'art/cact2.data'
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
     63
-    64 2AC0			cact_widths 	; widths of cactii in bytes
-    65 2AC0 04 04 08			.by  4, 4, 8
-    66 2AC3			cact_heights	; heights of cactii in lines
-    67 2AC3 23 30 23			.by 35,48,35
-    68 2AC6			cact_tab_l
+    64 2B0D			cact_widths 	; widths of cactii in bytes
+    65 2B0D 04 04 08			.by  4, 4, 8
+    66 2B10			cact_heights	; heights of cactii in lines
+    67 2B10 23 30 23			.by 35,48,35
+    68 2B13			cact_tab_l
     69 					.rept cacti, #
     70 						.BY <CACT:1
     71 					.ENDR
     71 					.endr
 Source: REPT
-    70 2AC6 5C					.BY <CACT0
-    70 2AC7 E8					.BY <CACT1
-    70 2AC8 A8					.BY <CACT2
+    70 2B13 A9					.BY <CACT0
+    70 2B14 35					.BY <CACT1
+    70 2B15 F5					.BY <CACT2
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
-    72 2AC9			cact_tab_h
+    72 2B16			cact_tab_h
     73 					.rept cacti, #
     74 						.BY >CACT:1
     75 					.ENDR
     75 					.endr
 Source: REPT
-    74 2AC9 28					.BY >CACT0
-    74 2ACA 28					.BY >CACT1
-    74 2ACB 29					.BY >CACT2
+    74 2B16 28					.BY >CACT0
+    74 2B17 29					.BY >CACT1
+    74 2B18 29					.BY >CACT2
 Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
     76
