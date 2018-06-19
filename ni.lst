@@ -1,0 +1,1566 @@
+mads 2.0.6 build 58 (28 Jan 17)
+Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
+     1 				;	@com.wudsn.ide.asm.mainsourcefile=ni.asm
+     2 					icl 'atari.asm'
+Source: C:\jac\wudsn\Workspace\no_internet\atari.asm
+     1 				/*
+     2 				scr48	=	%00111111	;screen 48b
+     3 				scr40	=	%00111110	;screen 40b
+     4 				scr32	=	%00111101	;screen 32b
+     5 				*/
+     5
+     6
+     7 				* ---------------------------------------------------------------------------------------------
+     8 				* ---	GTIA
+     9 				* ---------------------------------------------------------------------------------------------
+    10 = D000			HPOSP0	=	$D000		; pozioma pozycja gracza 0 (Z)
+    11 = D001			HPOSP1	=	$D001		; pozioma pozycja gracza 1 (Z)
+    12 = D002			HPOSP2	=	$D002		; pozioma pozycja gracza 2 (Z)
+    13 = D003			HPOSP3	=	$D003		; pozioma pozycja gracza 3 (Z)
+    14 = D004			HPOSM0	=	$D004		; pozioma pozycja pocisku 0 (Z)
+    15 = D005			HPOSM1	=	$D005		; pozioma pozycja pocisku 1 (Z)
+    16 = D006			HPOSM2	=	$D006		; pozioma pozycja pocisku 2 (Z)
+    17 = D007			HPOSM3	=	$D007		; pozioma pozycja pocisku 3 (Z)
+    18 = D008			SIZEP0	=	$D008		; poziomy rozmiar gracza 0 (Z)
+    19 = D009			SIZEP1	=	$D009		; poziomy rozmiar gracza 1 (Z)
+    20 = D00A			SIZEP2	=	$D00A		; poziomy rozmiar gracza 2 (Z)
+    21 = D00B			SIZEP3	=	$D00B		; poziomy rozmiar gracza 3 (Z)
+    22 = D00C			SIZEM	=	$D00C		; poziomy rozmiar pocisków (Z)
+    23 = D00D			GRAFP0	=	$D00D		; rejestr grafiki gracza 0 (Z)
+    24 = D00E			GRAFP1	=	$D00E		; rejestr grafiki gracza 1 (Z)
+    25 = D00F			GRAFP2	=	$D00F		; rejestr grafiki gracza 2 (Z)
+    26 = D010			GRAFP3	=	$D010		; rejestr grafiki gracza 3 (Z)
+    27 = D011			GRAFM	=	$D011		; rejestr grafiki pocisków (Z)
+    28 = D012			COLPM0	=	$D012		; rejestr koloru gracza i pocisku 0 (Z)
+    29 = D013			COLPM1	=	$D013		; rejestr koloru gracza i pocisku 1 (Z)
+    30 = D014			COLPM2	=	$D014		; rejestr koloru gracza i pocisku 2 (Z)
+    31 = D015			COLPM3	=	$D015		; rejestr koloru gracza i pocisku 3 (Z)
+    32 = D016			COLPF0	=	$D016		; rejestr koloru pola gry 0 (Z)
+    33 = D017			COLPF1	=	$D017		; rejestr koloru pola gry 1 (Z)
+    34 = D018			COLPF2	=	$D018		; rejestr koloru pola gry 2 (Z)
+    35 = D019			COLPF3	=	$D019		; rejestr koloru pola gry 3 (Z)
+    36 = D01A			COLBAK	=	$D01A		; rejestr koloru t³a (Z)
+    37
+    38 = D016			COLOR0	=	colpf0
+    39 = D017			COLOR1	=	colpf1
+    40 = D018			COLOR2	=	colpf2
+    41 = D019			COLOR3	=	colpf3
+    42
+    43 = D000			KOLM0PF	=	$D000		; kolizja pocisku 0 z polem gry (O)
+    44 = D001			KOLM1PF	=	$D001		; kolizja pocisku 1 z polem gry (O)
+    45 = D002			KOLM2PF	=	$D002		; kolizja pocisku 2 z polem gry (O)
+    46 = D003			KOLM3PF	=	$D003		; kolizja pocisku 3 z polem gry (O)
+    47 = D004			KOLP0PF	=	$D004		; kolizja gracza 0 z polem gry (O)
+    48 = D005			KOLP1PF	=	$D005		; kolizja gracza 1 z polem gry (O)
+    49 = D006			KOLP2PF	=	$D006		; kolizja gracza 2 z polem gry (O)
+    50 = D007			KOLP3PF	=	$D007		; kolizja gracza 3 z polem gry (O)
+    51 = D008			KOLM0P	=	$D008		; kolizja pocisku 0 z graczem (O)
+    52 = D009			KOLM1P	=	$D009		; kolizja pocisku 1 z graczem (O)
+    53 = D00A			KOLM2P	=	$D00A		; kolizja pocisku 2 z graczem (O)
+    54 = D00B			KOLM3P	=	$D00B		; kolizja pocisku 3 z graczem (O)
+    55 = D00C			KOLP0P	=	$D00C		; kolizja gracza 0 z innym graczem (O)
+    56 = D00D			KOLP1P	=	$D00D		; kolizja gracza 1 z innym graczem (O)
+    57 = D00E			KOLP2P	=	$D00E		; kolizja gracza 2 z innym graczem (O)
+    58 = D00F			KOLP3P	=	$D00F		; kolizja gracza 3 z innym graczem (O)
+    59 = D010			TRIG0	=	$D010		; stan przycisku joysticka 0 (O)
+    60 = D011			TRIG1	=	$D011		; stan przycisku joysticka 1 (O)
+    61 = D013			TRIG3	=	$D013		; znacznik do³¹czenia cartridge-a (O)
+    62 = D014			PAL	=	$D014		; znacznik systemu TV (O)
+    63
+    64 = D01B			GTICTL	=	$D01B		; rejestr kontroli uk³adu GTIA
+    65 = D01B			GTIACTL	=	gtictl
+    66
+    67 = D01C			VDELAY	=	$D01C		; licznik opóŸnienia pionowego P/MG
+    68 = D01D			PMCNTL	=	$D01D		; rejestr kontroli graczy i pocisków
+    69 = D01E			HITCLR	=	$D01E		; rejestr kasowania rejestrów kolizji
+    70 = D01F			CONSOL	=	$D01F		; rejestr stanu klawiszy konsoli Start (bit 0), Select (bit 1), Option (bit 2) 
+    71
+    72 				* ---------------------------------------------------------------------------------------------
+    73 				* ---	POKEY
+    74 				* ---------------------------------------------------------------------------------------------
+    75
+    76 = 0010			IRQENS	=	$0010		; rejestr-cieñ IRQEN
+    77 = 0011			IRQSTAT	=	$0011		; rejestr-cieñ IRQST
+    78
+    79 = D204			AUDF3	=	$D204		; czêstotliwoœæ pracy generatora 3 (Z)
+    80 = D208			AUDCTL	=	$D208		; rejestr kontroli generatorów dŸwiêku (Z)
+    81 = D209			STIMER	=	$D209		; rejestr zerowania liczników (Z)
+    82 = D209			KBCODE	=	$D209		; kod ostatnio naciœniêtego klawisza (O)
+    83 = D20A			SKSTRES	=	$D20A		; rejestr statusu z³¹cza szeregowego (Z)
+    84 = D20A			RANDOM	=	$D20A		; rejestr liczby losowej (O)
+    85 = D20D			SEROUT	=	$D20D		; szeregowy rejestr wyjœciowy (Z)
+    86 = D20D			SERIN	=	$D20D		; szeregowy rejestr wejœciowy (O)
+    87 = D20E			IRQEN	=	$D20E		; zezwolenie przerwañ IRQ (Z)
+    88 = D20E			IRQST	=	$D20E		; status przerwañ IRQ (O)
+    89 = D20F			SKCTL	=	$D20F		; rejestr kontroli z³¹cza szeregowego (Z)
+    90 = D20F			SKSTAT	=	$D20F		; rejestr statusu z³¹cza szeregowego (O)
+    91
+    92 				* ---------------------------------------------------------------------------------------------
+    93 				* ---	PIA
+    94 				* ---------------------------------------------------------------------------------------------
+    95 = D300			PORTA	=	$D300		; port A uk³adu PIA
+    96 = D301			PORTB	=	$D301		; port B uk³adu PIA
+    97 = D302			PACTL	=	$D302		; rejestr kontroli portu A
+    98 = D303			PBCTL	=	$D303		; rejestr kontroli portu B
+    99
+   100 				* ---------------------------------------------------------------------------------------------
+   101 				* ---	ANTIC
+   102 				* ---------------------------------------------------------------------------------------------
+   103 = D400			DMACTL	=	$D400		; rejestr kontroli dostêpu do pamiêci
+   104 = D401			CHRCTL	=	$D401		; rejestr kontroli wyœwietlania znaków
+   105 = D402			DLPTR	=	$D402		; adres programu ANTIC-a
+   106 = D404			HSCROL	=	$D404		; znacznik poziomego przesuwu obrazu
+   107 = D405			VSCROL	=	$D405		; znacznik pionowego przesuwu obrazu
+   108 = D407			PMBASE	=	$D407		; adres pamiêci graczy i pocisków
+   109 = D409			CHBASE	=	$D409		; adres zestawu znaków
+   110 = D40A			WSYNC	=	$D40A		; znacznik oczekiwania na synchronizacjê poziom¹
+   111 = D40B			VCOUNT	=	$D40B		; licznik linii obrazu
+   112 = D40C			LPENH	=	$D40C		; poziome po³o¿enie pióra œwietlengo
+   113 = D40D			LPENV	=	$D40D		; pionowe po³o¿enie pióra œwietlnego
+   114 = D40E			NMIEN	=	$D40E		; rejestr zezwoleñ na przerwania NMI
+   115 = D40F			NMIST	=	$D40F		; rejestr statusu przerwañ NMI
+   116
+   117 				;-------------------------------------
+   118 				;additional system variables
+   119 				;-------------------------------------
+   120 = 02C0			COLPM0S = $02C0 ;- - rejestr-cieñ COLPM0
+   121 = 02C1			COLPM1S = $02C1 ;- - rejestr-cieñ COLPM1
+   122 = 02C2			COLPM2S = $02C2 ;- - rejestr-cieñ COLPM2
+   123 = 02C3			COLPM3S = $02C3 ;- - rejestr-cieñ COLPM3
+   124 = 02C4			COLPF0S = $02C4 ;- - rejestr-cieñ COLPF0
+   125 = 02C5			COLPF1S = $02C5 ;- - rejestr-cieñ COLPF1
+   126 = 02C6			COLPF2S = $02C6 ;- - rejestr-cieñ COLPF2
+   127 = 02C7			COLPF3S = $02C7 ;- - rejestr-cieñ COLPF3
+   128
+   129 = 02C8			COLBAKS = $02C8
+   130 = 026F			GTICTLS = $026F ;- - rejestr-cieñ GTIACTL
+   131
+   132 = 022F			DMACTLS = $022F ;- - rejestr kontroli dostêpu do pamiêci - cieñ
+   133 = 0230			DLPTRS  = $0230 ;- - adres programu ANTIC-a - cieñ
+   134 = 02F4			CHBAS   = $02F4 ;- - rejestr-cieñ CHBASE
+   135 = 02FC			KBCODES = $02FC ;- - rejestr-cieñ KBCODE
+   136
+   137 = E45C			SETVBV  =   $E45C
+   138 = E462			XITVBV  =   $E462
+   139 = E45F			SYSVBV  =   $E45F
+   140 = 0012			RTCLOK  =   $0012
+   141
+   142 = 02E5			MEMTOP  =   $02E5 ;- - adres górnej granicy wolnej pamiêci RAM
+   143 = 02E7			MEMLO   =   $02E7 ;- - adres dolnej granicy wolnej pamiêci RAM
+   144
+   145 = 0278			JSTICK0 = $0278 ;-  - po³o¿enie joysticka 0
+   146 = 0279			JSTICK1 = $0279 ;- JSTICK1 - po³o¿enie joysticka 1
+   147 = 027A			JSTICK2 = $027A ;- JSTICK2 - po³o¿enie joysticka 0
+   148 = 027B			JSTICK3 = $027B ;- JSTICK3 - po³o¿enie joysticka 1
+   149 = 027C			PTRIG0  = $027C ;- PTRIG0 - przycisk potencjometru 0
+   150 = 027D			PTRIG1  = $027D ;- PTRIG1 - przycisk potencjometru 1
+   151 = 0284			TRIG0S  = $0284 ;- TRIG0S - przycisk joysticka 0, rejestr-cieñ TRIG0
+   152 = 0285			TRIG1S  = $0285 ;- TRIG1S - przycisk joysticka 1, rejestr-cieñ TRIG1
+   153 = 0286			TRIG2S  = $0286 ;- TRIG2S - rejestr-cieñ TRIG0
+   154 = 0287			TRIG3S  = $0287 ;- TRIG3S - rejestr-cieñ TRIG1
+   155
+   156
+   157 				/*
+   158 				Rejestry OS w pamiêci RAM
+   159
+   160 				  $08 - WARMST - znacznik gor¹cego startu
+   161 				  $0E - APPMHI - najwy¿szy adres RAM zajêty przez program
+   162 				  $10 - IRQENS - rejestr-cieñ IRQEN
+   163 				  $11 - IRQSTAT - rejestr-cieñ IRQST
+   164 				  $12 - RTCLOK - zegar czasu rzeczywistego
+   165 				  $15 - BUFADR - adres bufora dla operacji dyskowych
+   166 				  $17 - ICCOMT - rejestr przejœciowy kodu operacji I/O
+   167 				  $20 - ZIOCB - zerostronicowy blok kontroli I/O
+   168 				  $20 - ICHIDZ - indeks wpisu urz¹dzenia w HATABS
+   169 				  $21 - ICDNOZ - numer urz¹dzenia
+   170 				  $22 - ICCOMZ - kod operacji wejœcia/wyjœcia
+   171 				  $23 - ICSTZ - status operacji wejœcia/wyjœcia
+   172 				  $24 - ICBAZ - adres bufora danych dla operacji I/O
+   173 				  $26 - ICPTZ - adres procedury obs³ugi dla operacji
+   174 				  $28 - ICBLZ - d³ugoœæ bufora danych dla operacji I/O
+   175 				  $2A - ICAX1Z - rejestr pomocniczy ZIOCB
+   176 				  $2B - ICAX2Z - rejestr pomocniczy ZIOCB
+   177 				  $2C - ICAX3Z - rejestr pomocniczy ZIOCB
+   178 				  $2D - ICAX4Z - rejestr pomocniczy ZIOCB
+   179 				  $2E - ICAX5Z - rejestr pomocniczy ZIOCB
+   180 				  $2F - ICAX6Z - rejestr pomocniczy ZIOCB
+   181 				  $30 - STATUS - status aktualnej operacji SIO
+   182 				  $31 - CHKSUM - suma kontrolna dla operacji SIO
+   183 				  $32 - BUFR - adres bufora danych dla SIO
+   184 				  $34 - BUFEN - adres koñca bufora danych dla SIO
+   185 				  $36 - LTEMP - pomocniczy wektor odczytu listy liniowej
+   186 				  $38 - BUFRFL - znacznik zape³nienia bufora SIO
+   187 				  $39 - RECVND - znacznik koñca odczytu
+   188 				  $3A - XMTDON - znacznik koñca transmisji
+   189 				  $3B - CHKSNT - znacznik nadania sumy kontrolnej
+   190 				  $3C - NOCKSM - znacznik braku sumy kontrolnej
+   191 				  $3D - BPTR - licznik bufora magnetofonu
+   192 				  $3E - GAPTYP - znacznik d³ugoœci przerwy miêdzy blokami
+   193 				  $3F - FEOF - znacznik koñca zbioru
+   194 				  $40 - FREQ - licznik dŸwiêku przy otwarciu magnetofonu
+   195 				  $41 - IOSNDEN - znacznik dŸwiêku przy transmisji
+   196 				  $42 - CRITIC - znacznik krytycznych czasowo operacji I/O
+   197 				  $4A - ZCHAIN - rejestr nastêpstwa listy liniowej
+   198 				  $4C - DSTAT - status klawiatury i ekranu
+   199 				  $50 - TEMP - pomocniczy rejestr przejœciowy
+   200 				  $51 - HOLD1 - pomocniczy rejestr przejœciowy
+   201 				  $52 - LMARGIN - lewy margines obrazu
+   202 				  $53 - RMARGIN - prawy margines obrazu
+   203 				  $54 - ROWCRS - pionowa pozycja kursora
+   204 				  $55 - COLCRS - pozioma pozycja kursora
+   205 				  $57 - DINDEX - numer trybu graficznego OS
+   206 				  $58 - SAVMSC - adres pamiêci obrazu
+   207 				  $5A - OLDROW - poprzednia pionowa pozycja kursora
+   208 				  $5B - OLDCOL - poprzednia pozioma pozycja kursora
+   209 				  $5D - OLDCHR - poprzedni znak na ekranie
+   210 				  $5E - OLDADR - poprzedni adres znaku na ekranie
+   211 				  $60 - FKDEFP - wektor tabeli definicji klawiszy F1-F4
+   212 				  $62 - PALNTS - wskaŸnik systemu TV
+   213 				  $63 - LOGCOL - adres kursora w wierszu logicznym
+   214 				  $64 - ADRESS - rejestr adresowy dla procedur edytora
+   215 				  $66 - MLTTMP - pomocniczy rejestr przejœciowy
+   216 				  $68 - SAVADR - pomocniczy rejestr adresowy
+   217 				  $6A - RAMTOP - liczba stron pamiêci RAM
+   218 				  $6B - BUFCNT - licznik bufora edytora
+   219 				  $6C - BUFSTR - adres bufora dla edytora
+   220 				  $6E - BITMSK - maska bitowa do wyœwietlenia znaku
+   221 				  $6F - SHFAMT - liczba przesuniêæ punktu
+   222 				  $70 - ROWAC - aktualny wiersz przy rysowaniu
+   223 				  $72 - COLAC - aktualna kolumna przy rysowaniu
+   224 				  $74 - ENDPT - znacznik koñca rysowanej linii
+   225 				  $76 - DELTAR - przyrost pionowej pozycji kursora
+   226 				  $77 - DELTAC - przyrost poziomej pozycji kursora
+   227 				  $79 - KEYDEFP - wektor tabeli definicji klawiszy
+   228 				  $7B - SWPFLG - znacznik kursora w trybach z oknem
+   229 				  $7C - HOLDCH - przechowywanie wartoœci znaku
+   230 				  $7D - INSDAT - rejestr pomocniczy edytora
+   231 				  $7E - COUNTR - licznik pamiêci obrazu dla DOSCR i DRAW
+   232 				$0100 - STACK - stos mikroprocesora 6502
+   233 				$0200 - DLIV - wektor przerwania programu ANTIC-a
+   234 				$0210 - VTIMR1 - wektor przerwania licznika 1 POKEY-a
+   235 				$0212 - VTIMR2 - wektor przerwania licznika 2 POKEY-a
+   236 				$0214 - VTIMR4 - wektor przerwania licznika 4 POKEY-a
+   237 				$0218 - TIMCNT1 - pierwszy licznik systemu
+   238 				$0226 - TIMVEC1 - wektor przerwania licznika TIMCNT1
+   239 				$022A - TIMFLG3 - znacznik wyzerowania licznika TIMCNT3
+   240 				$022F - DMACTLS - rejestr-cieñ DMACTL
+   241 				$0230 - DLPTRS - rejestr-cieñ DLPTR
+   242 				$0232 - SKCTLS - rejestr-cieñ SKCTL
+   243 				$0233 - LCOUNT - licznik odczytu dla nowego urz¹dzenia
+   244 				$0234 - LPENHS - rejestr-cieñ LPENH
+   245 				$0235 - LPENVS - rejestr-cieñ LPENV
+   246 				$023A - CDEVIC - kod urz¹dzenia dla SIO
+   247 				$023B - CCMND - kod operacji dla SIO
+   248 				$023C - CAUX1 - pierwszy bajt pomocniczy dla SIO
+   249 				$023D - CAUX2 - drugi bajt pomocniczy dla SIO
+   250 				$023E - TEMP - tymczasowy rejestr odpowiedzi urz¹dzenia
+   251 				$023F - ERRFLG - znacznik b³êdu operacji SIO
+   252 				$0244 - COLDST - znacznik zimnego startu systemu
+   253 				$0245 - RECLEN - d³ugoœæ rekordu z nowego urz¹dzenia
+   254 				$0246 - DSKTIM - wartoœæ Timeout dla stacji dysków
+   255 				$0247 - PDVMSK - maska obecnoœci nowych urz¹dzeñ
+   256 				$0248 - PDVRS - rejestr-cieñ PDVREG
+   257 				$024A - RELADR - adres procedury przemieszczalnej
+   258 				$024C - PPTMPA - rejestr przechowania zawartoœci akumulatora
+   259 				$024D - PPTMPX - rejestr przechowania zawartoœci rejestru X
+   260 				$026B - CHSPTR - wektor nieu¿ywanego zestawu znaków
+   261 				$026C - VSFLAG - znacznik przesuwu pionowego obrazu
+   262 				$026E - FINE - znacznik delikatnego przesuwu obrazu
+   263 				$026F - GTICTLS - rejestr-cieñ GTIACTL
+   264 				$0270 - PADDL0 - rejestr-cieñ POT0
+   265 				$0278 - JSTICK0 - po³o¿enie joysticka 0
+   266 				$0279 - JSTICK1 - po³o¿enie joysticka 1
+   267 				$027A - JSTICK2 - po³o¿enie joysticka 0
+   268 				$027B - JSTICK3 - po³o¿enie joysticka 1
+   269 				$027C - PTRIG0 - przycisk potencjometru 0
+   270 				$027D - PTRIG1 - przycisk potencjometru 1
+   271 				$0284 - TRIG0S - przycisk joysticka 0, rejestr-cieñ TRIG0
+   272 				$0285 - TRIG1S - przycisk joysticka 1, rejestr-cieñ TRIG1
+   273 				$0286 - TRIG2S - rejestr-cieñ TRIG0
+   274 				$0287 - TRIG3S - rejestr-cieñ TRIG1
+   275 				$0288 - HIBYTE - indeks operacji nowego urz¹dzenia
+   276 				$0289 - WMODE - znacznik sposobu dostêpu do magnetofonu
+   277 				$028A - BLIM - d³ugoœæ bufora magnetofonu
+   278 				$028E - NEWADR - adres procedury nowego urz¹dzenia
+   279 				$0290 - TXTROW - wiersz kursora w oknie tekstowym
+   280 				$0291 - TXTCOL - kolumna kursora w oknie tekstowym
+   281 				$0293 - TINDEX - tryb graficzny OS w oknie tekstowym
+   282 				$0294 - TXTMSC - adres pamiêci okna tekstowego
+   283 				$029C - CRETRY - liczba powtórzeñ rozkazu operacji
+   284 				$029D - HOLD3 - pomocniczy rejestr przejœciowy
+   285 				$029E - SUBTMP - pomocniczy rejestr przejœciowy
+   286 				$02A0 - DMASK - maska punktów obrazu
+   287 				$02A2 - ESCFLG - znacznik klawisza ESC
+   288 				$02A3 - TABMAP - mapa pozycji tabulacji
+   289 				$02B2 - LOGMAP - mapa linii logicznych
+   290 				$02B6 - INVFLG - znacznik klawisza inverse video
+   291 				$02B7 - FILFLG - znacznik wype³niania obrazu
+   292 				$02B8 - TMPROW - tymczasowy rejestr pozycji kursora
+   293 				$02B9 - TMPCOL - tymczasowy rejestr pozycji kursora
+   294 				$02BB - SCRFLG - znacznik przesuwu obrazu
+   295 				$02BC - HOLD4 - pomocniczy rejestr przejœciowy
+   296 				$02BD - DRETRY - liczba powtórzeñ wywo³añ urz¹dzenia
+   297 				$02BE - SHFLOK - znacznik klawiszy SHIFT i CONTROL
+   298 				$02BF - BOTSCR - liczba wierszy tekstu
+   299 				$02C0 - COLPM0S - rejestr-cieñ COLPM0
+   300 				$02C1 - COLPM1S - rejestr-cieñ COLPM1
+   301 				$02C2 - COLPM2S - rejestr-cieñ COLPM2
+   302 				$02C3 - COLPM3S - rejestr-cieñ COLPM3
+   303 				$02C4 - COLPF0S - rejestr-cieñ COLPF0
+   304 				$02C5 - COLPF1S - rejestr-cieñ COLPF1 ;gr.8 letters
+   305 				$02C6 - COLPF2S - rejestr-cieñ COLPF2 ;gr.8 background
+   306 				$02C7 - COLPF3S - rejestr-cieñ COLPF3
+   307 				$02C8 - COLBAKS - rejestr-cieñ COLBAK
+   308 				$02C9 - RUNADR - adres procedury nowego urz¹dzenia
+   309 				$02CB - HIUSED - adres koñcowy procedury nowego urz¹dzenia
+   310 				$02CF - GBYTEA - adres procedury nowego urz¹dzenia
+   311 				$02D1 - LOADAD - adres wczytywania z nowego urz¹dzenia
+   312 				$02D3 - ZLOADA - pomocniczy rejestr adresu wczytywania
+   313 				$02D5 - DSCTLN - d³ugoœæ sektora dyskowego
+   314 				$02DB - NOCLIK - znacznik dŸwiêku klawiatury
+   315 				$02DE - PBPNT - licznik bufora drukarki
+   316 				$02DF - PBUFSZ - d³ugoœæ bufora drukarki
+   317 				$02E5 - MEMTOP - adres górnej granicy wolnej pamiêci RAM
+   318 				$02E7 - MEMLO - adres dolnej granicy wolnej pamiêci RAM
+   319 				$02E9 - HNDLOD - znacznik relokowalnej procedury obs³ugi I/O
+   320 				$02EA - DVSTAT - dodatkowy rejestr statusu urz¹dzenia
+   321 				$02EC - DVTMOT - dodatkowy rejestr Timeout urz¹dzenia
+   322 				$02ED - REVNUM - numer wersji nowego urz¹dzenia
+   323 				$02EE - CBAUD - prêdkoœæ transmisji z magnetofonu
+   324 				$02F0 - CRSINH - znacznik widocznoœci kursora
+   325 				$02F3 - CHACT - rejestr-cieñ CHRCTL
+   326 				$02F4 - CHBAS - rejestr-cieñ CHBASE
+   327 				$02F5 - NEWROW - nowa pozycja pionowa kursora
+   328 				$02F6 - NEWCOL - nowa pozycja pozioma kursora
+   329 				$02F8 - ROWINC - zmiana pionowej pozycji kursora
+   330 				$02F9 - COLINC - zmiana poziomej pozycji kursora
+   331 				$02FA - CHAR - kod wewnêtrzny znaku
+   332 				$02FB - ATACHR - kod ATASCII znaku
+   333 				$02FC - KBCODES - rejestr-cieñ KBCODE
+   334 				$02FD - FILDAT - numer koloru dla wype³niania
+   335 				$02FE - DSPFLG - znacznik wyœwietlania znaków kontrolnych
+   336 				$02FF - SSFLAG - znacznik start/stop dla przesuwu obrazu
+   337 				$0300 - DDEVIC - kod identyfikacyjny urz¹dzenia
+   338 				$0301 - DUNIT - numer identyfikacyjny urz¹dzenia
+   339 				$0302 - DCMND - bajt rozkazu dla urz¹dzenia
+   340 				$0303 - DSTATS - status urz¹dzenia
+   341 				$0304 - DBUFA - adres bufora danych
+   342 				$0306 - DTIMLO - wartoœæ Timeout dla urz¹dzenia
+   343 				$0308 - DBYT - d³ugoœæ bufora danych
+   344 				$030A - DAUX1 - rejestr pomocniczy dla operacji I/O
+   345 				$030B - DAUX2 - rejestr pomocniczy dla operacji I/O
+   346 				$030C - INTIM1 - rejestr czasu przy odczycie z magnetofonu
+   347 				$030F - CASFLG - znacznik operacji z magnetofonem
+   348 				$0310 - INTIM2 - rejestr czasu przy odczycie z magnetofonu
+   349 				$0312 - TEMP1 - pomocniczy rejestr przejœciowy
+   350 				$0313 - TEMP2 - pomocniczy rejestr przejœciowy
+   351 				$0314 - PTIMOT - wartoœæ Timeout dla drukarki
+   352 				$0315 - TEMP3 - pomocniczy rejestr przejœciowy
+   353 				$0316 - SAVIO - rejestr przejœciowy dla operacji SIO
+   354 				$0317 - TIMFLG - znacznik up³yniêcia czasu Timeout
+   355 				$0318 - STACKP - rejestr wskaŸnika stosu dla SIO
+   356 				$0319 - TSTAT - przejœciowy rejestr statusu SIO
+   357 				$031A - HATABS - tabela wektorów procedur obs³ugi
+   358 				$0340 - IOCB0 - blok kontroli I/O numer 0
+   359 				$0350 - IOCB1 - blok kontroli I/O numer 1
+   360 				$0360 - IOCB2 - blok kontroli I/O numer 2
+   361 				$0370 - IOCB3 - blok kontroli I/O numer 3
+   362 				$0380 - IOCB4 - blok kontroli I/O numer 4
+   363 				$0390 - IOCB5 - blok kontroli I/O numer 5
+   364 				$03A0 - IOCB6 - blok kontroli I/O numer 6
+   365 				$03B0 - IOCB7 - blok kontroli I/O numer 7
+   366 				$0340 - ICCHID - indeks wpisu urz¹dzenia w HATABS
+   367 				$0341 - ICDNO - numer urz¹dzenia
+   368 				$0342 - ICCMD - kod rozkazu operacji I/O
+   369 				$0343 - ICSTAT - status operacji I/O
+   370 				$0344 - ICBUFA - adres bufora danych dla operacji I/O
+   371 				$0346 - ICPUTB - adres procedury przesy³ania danych
+   372 				$0348 - ICBUFL - d³ugoœæ bufora danych dla operacji I/O
+   373 				$034A - ICAX1 - rejestr pomocniczy dla operacji I/O
+   374 				$034B - ICAX2 - rejestr pomocniczy dla operacji I/O
+   375 				$034C - ICAX3 - rejestr pomocniczy dla operacji I/O
+   376 				$034D - ICAX4 - rejestr pomocniczy dla operacji I/O
+   377 				$034E - ICAX5 - rejestr pomocniczy dla operacji I/O
+   378 				$034F - ICAX6 - rejestr pomocniczy dla operacji I/O
+   379 				$03C0 - PRNBUF - bufor drukarki
+   380 				$03E8 - SUPERF - znacznik stosowany przy odczycie klawiatury
+   381 				$03E9 - CKEY - znacznik klawisza START przy zimnym starcie
+   382 				$03EC - DERRF - znacznik b³êdu przy otwieraniu edytora
+   383 				$03FB - CHLINK  - rejestr elementów listy liniowej
+   384 				$03FD - CSCB - bajty kontroli szybkoœci magnetofonu
+   385 				$03FF - CRCB - bajt d³ugoœci rekordu magnetofonowego
+   386 				$0400 - CASBUF - bufor magnetofonu
+   387 				$047F - CASBEN - koniec bufora magnetofonu
+   388 				$D000 - HPOSP0 - pozioma pozycja gracza 0 (Z)
+   389 				$D000 - KOLM0PF - kolizja pocisku 0 z polem gry (O)
+   390 				$D001 - HPOSP1 - pozioma pozycja gracza 1 (Z)
+   391 				$D001 - KOLM1PF - kolizja pocisku 1 z polem gry (O)
+   392 				$D002 - HPOSP2 - pozioma pozycja gracza 2 (Z)
+   393 				$D002 - KOLM2PF - kolizja pocisku 2 z polem gry (O)
+   394 				$D003 - HPOSP3 - pozioma pozycja gracza 3 (Z)
+   395 				$D003 - KOLM3PF - kolizja pocisku 3 z polem gry (O)
+   396 				$D004 - HPOSM0 - pozioma pozycja pocisku 0 (Z)
+   397 				$D004 - KOLP0PF - kolizja gracza 0 z polem gry (O)
+   398 				$D005 - HPOSM1 - pozioma pozycja pocisku 1 (Z)
+   399 				$D005 - KOLP1PF - kolizja gracza 1 z polem gry (O)
+   400 				$D006 - HPOSM2 - pozioma pozycja pocisku 2 (Z)
+   401 				$D006 - KOLP2PF - kolizja gracza 2 z polem gry (O)
+   402 				$D007 - HPOSM3 - pozioma pozycja pocisku 3 (Z)
+   403 				$D007 - KOLP3PF - kolizja gracza 3 z polem gry (O)
+   404 				$D008 - SIZEP0 - poziomy rozmiar gracza 0 (Z)
+   405 				$D008 - KOLM0P - kolizja pocisku 0 z graczem (O)
+   406 				$D009 - SIZEP1 - poziomy rozmiar gracza 1 (Z)
+   407 				$D009 - KOLM1P - kolizja pocisku 1 z graczem (O)
+   408 				$D00A - SIZEP2 - poziomy rozmiar gracza 2 (Z)
+   409 				$D00A - KOLM2P - kolizja pocisku 2 z graczem (O)
+   410 				$D00B - SIZEP3 - poziomy rozmiar gracza 3 (Z)
+   411 				$D00B - KOLM3P - kolizja pocisku 3 z graczem (O)
+   412 				$D00C - SIZEM - poziomy rozmiar pocisków (Z)
+   413 				$D00C - KOLP0P - kolizja gracza 0 z innym graczem (O)
+   414 				$D00D - GRAFP0 - rejestr grafiki gracza 0 (Z)
+   415 				$D00D - KOLP1P - kolizja gracza 1 z innym graczem (O)
+   416 				$D00E - GRAFP1 - rejestr grafiki gracza 1 (Z)
+   417 				$D00E - KOLP2P - kolizja gracza 2 z innym graczem (O)
+   418 				$D00F - GRAFP2 - rejestr grafiki gracza 2 (Z)
+   419 				$D00F - KOLP3P - kolizja gracza 3 z innym graczem (O)
+   420 				$D010 - GRAFP3 - rejestr grafiki gracza 3 (Z)
+   421 				$D010 - TRIG0 - stan przycisku joysticka 0 (O)
+   422 				$D011 - GRAFM - rejestr grafiki pocisków (Z)
+   423 				$D011 - TRIG1 - stan przycisku joysticka 1 (O)
+   424 				$D012 - COLPM0 - rejestr koloru gracza i pocisku 0 (Z)
+   425 				$D013 - COLPM1 - rejestr koloru gracza i pocisku 1 (Z)
+   426 				$D013 - TRIG3 - znacznik do³¹czenia cartridge'a (O)
+   427 				$D014 - COLPM2 - rejestr koloru gracza i pocisku 2 (Z)
+   428 				$D014 - PAL - znacznik systemu TV (O)
+   429 				$D015 - COLPM3 - rejestr koloru gracza i pocisku 3 (Z)
+   430 				$D016 - COLPF0 - rejestr koloru pola gry 0 (Z)
+   431 				$D017 - COLPF1 - rejestr koloru pola gry 1 (Z)
+   432 				$D018 - COLPF2 - rejestr koloru pola gry 2 (Z)
+   433 				$D019 - COLPF3 - rejestr koloru pola gry 3 (Z)
+   434 				$D01A - COLBAK - rejestr koloru t³a (Z)
+   435 				$D01B - GTIACTL - rejestr kontroli uk³adu GTIA
+   436 				$D01C - VDELAY - licznik opóŸnienia pionowego P/MG
+   437 				$D01D - PMCNTL - rejestr kontroli graczy i pocisków
+   438 				$D01E - HITCLR - rejestr kasowania rejestrów kolizji
+   439 				$D01F - CONSOL - rejestr stanu klawiszy konsoli
+   440 				$D1FF - PDVREG - rejestr wyboru nowego urz¹dzenia
+   441 				$D200 - AUDF1 - czêstotliwoœæ pracy generatora 1 (Z)
+   442 				$D200 - POT0 - rejestr po³o¿enia potencjometru 0 (O)
+   443 				$D201 - AUDC1 - rejestr kontroli dŸwiêku generatora 1 (Z)
+   444 				$D201 - POT1 - rejestr po³o¿enia potencjometru 1 (O)
+   445 				$D202 - AUDF2 - czêstotliwoœæ pracy generatora 2 (Z)
+   446 				$D202 - POT2 - rejestr po³o¿enia potencjometru 2 (O)
+   447 				$D203 - AUDC2 - rejestr kontroli dŸwiêku generatora 2 (Z)
+   448 				$D203 - POT3 - rejestr po³o¿enia potencjometru 3 (O)
+   449 				$D204 - AUDF3 - czêstotliwoœæ pracy generatora 3 (Z)
+   450 				$D205 - AUDC3 - rejestr kontroli dŸwiêku generatora 3 (Z)
+   451 				$D206 - AUDF4 - czêstotliwoœæ pracy generatora 4 (Z)
+   452 				$D207 - AUDC4 - rejestr kontroli dŸwiêku generatora 4 (Z)
+   453 				$D208 - AUDCTL - rejestr kontroli generatorów dŸwiêku (Z)
+   454 				$D208 - POTST - status odczytu potencjometrów (O)
+   455 				$D209 - STIMER - rejestr zerowania liczników (Z)
+   456 				$D209 - KBCODE - kod ostatnio naciœniêtego klawisza (O)
+   457 				$D20A - SKSTRES - reset statusu z³¹cza szeregowego (Z)
+   458 				$D20A - RANDOM - rejestr liczby losowej (O)
+   459 				$D20B - POTG0 - znacznik przetwornika analogowo-cyfrowego (Z)
+   460 				$D20D - SEROUT - szeregowy rejestr wyjœciowy (Z)
+   461 				$D20D - SERIN - szeregowy rejestr wejœciowy (O)
+   462 				$D20E - IRQEN - zezwolenia przerwañ IRQ (Z)
+   463 				$D20E - IRQST - status przerwañ IRQ (O)
+   464 				$D20F - SKCTL - rejestr kontroli z³¹cza szeregowego (Z)
+   465 				$D20F - SKSTAT - rejestr statusu z³¹cza szeregowego (O)
+   466 				$D300 - PORTA - port A uk³adu PIA
+   467 				$D301 - PORTB - port B uk³adu PIA
+   468 				$D302 - PACTL - rejestr kontroli portu A
+   469 				$D303 - PBCTL - rejestr kontroli portu B
+   470 				$D400 - DMACTL - rejestr kontroli dostêpu do pamiêci
+   471 				$D401 - CHRCTL - rejestr kontroli wyœwietlania znaków
+   472 				$D402 - DLPTR - adres programu ANTIC-a
+   473 				$D404 - HSCROL - znacznik poziomego przesuwu obrazu
+   474 				$D405 - VSCROL - znacznik pionowego przesuwu obrazu
+   475 				$D407 - PMBASE - adres pamiêci graczy i pocisków
+   476 				$D409 - CHBASE - adres zestawu znaków
+   477 				$D40A - WSYNC - znacznik oczekiwania na synchronizacjê poziom¹
+   478 				$D40B - VCOUNT - licznik linii obrazu
+   479 				$D40C - LPENH - poziome po³o¿enie pióra œwietlengo
+   480 				$D40D - LPENV - pionowe po³o¿enie pióra œwietlnego
+   481 				$D40E - NMIEN - rejestr zezwoleñ na przerwania NMI
+   482 				$D40F - NMIST - rejestr statusu przerwañ NMI
+   483 				*/
+   483
+     3 					icl 'macro.asm'
+Source: C:\jac\wudsn\Workspace\no_internet\macro.asm
+     1 				;-------------------------------------
+     2 				  .MACRO ROLW
+     3 				     ROL :1
+     4 				    ROL :1+1
+     5 				  .ENDM
+     6 				;-------------------------------------
+     7 				  .MACRO ASLW
+     8 				    ASL :1
+     9 				    ROL :1+1
+    10 				  .ENDM
+    11 				;-------------------------------------
+    12 				  .MACRO RORW
+    13 				    ROR :1+1
+    14 				    ROR :1
+    15 				  .ENDM
+    16 				;-------------------------------------
+    17 				  .MACRO LSRW
+    18 				    LSR :1+1
+    19 				    ROR :1
+    20 				  .ENDM
+    21
+    22 				;-------------------------------------
+    23 				         .MACRO VMAIN
+    24 				;	VMAIN #WORD,interrupt.vector
+    25 				; interrupt.vector:
+    26 				;    0 - VIMIRQ
+    27 				;    1 - TIMCNT1
+    28 				;    2 - TIMCNT2
+    29 				;    3 - TIMCNT3
+    30 				;    4 - TIMCNT4
+    31 				;    5 - TIMCNT5
+    32 				;    6 - VVBLKI
+    33 				;    7 - VVBLKD
+    34 				;    8 - TIMVEC1
+    35 				;    9 - TIMVEC2
+    36 				;	Initialises Vertical Blank Interrupts
+    37 				;       (works only with system interrupts ON)
+    38 				         LDY # <:1
+    39 				         LDX # >:1
+    40 				         LDA #:2
+    41 				         JSR SETVBV
+    42 				         .ENDM
+    43 				;-------------------------------------
+    44 				         .MACRO VDLI
+    45 				;	VDLI #WORD
+    46 				;	Initialises Display List Interrupts
+    47 				         LDY # <:1
+    48 				         LDX # >:1
+    49 				         LDA #$C0
+    50 				         STY $0200
+    51 				         STX $0201
+    52 				         STA NMIEN
+    53 				         .ENDM
+    54 				;-------------------------------------
+    55 				      .MACRO halt
+    56 				?stop  
+    57 				      .if :1
+    58 					      lda RANDOM 
+    59 					      and #:1
+    60 					      sta COLBAK
+    61 				      .endif
+    62 				      jmp ?stop
+    63 				      .ENDM
+    64 				;-------------------------------------
+    65 				         .MACRO KEY
+    66 				;	KEY
+    67 				;	waits for releasing and pressing "any key"
+    68 				         PHA
+    69 				?CK1      LDA SKSTAT
+    70 				         AND #$04
+    71 				         BEQ ?CK1
+    72 				?CK       LDA SKSTAT
+    73 				         AND #$04
+    74 				         BNE ?CK
+    75 				         PLA
+    76 				         .ENDM
+    77 				;-------------------------------------
+    78 					.MACRO WAIT	;waits one frame (1/50 s(PAL) or 1/60s(NTSC))
+    79 					;uses: A
+    80 						LDA VCOUNT
+    81 						STA WSYNC
+    82 						STA WSYNC
+    83 						STA WSYNC
+    84 				@		CMP VCOUNT
+    85 						BNE @-
+    86 					.ENDM
+    87 				;-------------------------------------
+    88 				    .macro negw
+    89 				    ; negate the given word (0-a)
+    90 				;-------------------------------------
+    91 				        sec
+    92 				        lda #$00
+    93 				        sbc :1
+    94 				        sta :1
+    95 				        lda #$00
+    96 				        sbc :1+1
+    97 				        sta :1+1
+    98 				    .endm
+    99 				;-------------------------------------
+   100 				    .macro randomize     ;returns (in A) a random .byte between "floor" (incl) and "ceiling" (excl)
+   101 				    ;usage: randomize floor ceiling AND
+   102 				    ;uses: A
+   103 				    
+   104 				?rand
+   105 				      lda random
+   106 				      .if :3
+   107 				      	and #:3
+   108 				      .endif
+   109 				      cmp #:1 		;floor
+   110 				      bcc ?rand
+   111 				      cmp #:2+1 	;ceiling
+   112 				      bcs ?rand
+   113 				    .endm
+   114 				;-------------------------------------
+   115 				    .macro phx
+   116 				      txa
+   117 				      pha
+   118 				    .endm
+   119 				;-------------------------------------
+   120 				    .macro phy
+   121 				      tya
+   122 				      pha
+   123 				    .endm
+   124 				;-------------------------------------
+   125 				    .macro plx
+   126 				      pla
+   127 				      tax
+   128 				    .endm
+   129 				;-------------------------------------
+   130 				    .macro ply
+   131 				      pla
+   132 				      tay
+   133 				    .endm
+   134 				;-------------------------------------
+   135 					.macro pause	;waits :1 number (byte) of frames 
+   136 					;uses: AX
+   137 					.if :1 > 0 
+   138 						ldx #:1
+   139 				loop   	wait
+   140 				      	dex
+   141 				      	bne loop
+   142 				     .else
+   143 				     	wait
+   144 				     .endif
+   145 				    .ENDM
+   146
+     4
+     5 					.zpvar tmp, tmp0, tmp1, tmp2, tmp3 .word
+     6 = 0080			sw = $80 ;screen width in bytes
+     7 = 0080			sh = 128 ; screen height in lines
+     8 = 4000			screen = $4000
+     9 = 9000			pmgraph = $9000
+    10 = 0080			TMP
+    10 = 0082			TMP0
+    10 = 0084			TMP1
+    10 = 0086			TMP2
+    10 = 0088			TMP3
+    10 					org $2000
+    11 				dl
+    12 FFFF> 2000-2250> 70 70 + 	.byte $70,$70,$70
+    13 2003			dl_addrs ;start of lines
+    14 					.REPT sh
+    15 						.BYTE $5F
+    16 						.WORD SCREEN+#*SW
+    17 					.ENDR
+    17 					.ENDR
+Source: REPT
+    15 2003 5F					.BYTE $5F
+    15 2004 00 40				.WORD SCREEN+#*SW
+    15 2006 5F					.BYTE $5F
+    15 2007 80 40				.WORD SCREEN+#*SW
+    15 2009 5F					.BYTE $5F
+    15 200A 00 41				.WORD SCREEN+#*SW
+    15 200C 5F					.BYTE $5F
+    15 200D 80 41				.WORD SCREEN+#*SW
+    15 200F 5F					.BYTE $5F
+    15 2010 00 42				.WORD SCREEN+#*SW
+    15 2012 5F					.BYTE $5F
+    15 2013 80 42				.WORD SCREEN+#*SW
+    15 2015 5F					.BYTE $5F
+    15 2016 00 43				.WORD SCREEN+#*SW
+    15 2018 5F					.BYTE $5F
+    15 2019 80 43				.WORD SCREEN+#*SW
+    15 201B 5F					.BYTE $5F
+    15 201C 00 44				.WORD SCREEN+#*SW
+    15 201E 5F					.BYTE $5F
+    15 201F 80 44				.WORD SCREEN+#*SW
+    15 2021 5F					.BYTE $5F
+    15 2022 00 45				.WORD SCREEN+#*SW
+    15 2024 5F					.BYTE $5F
+    15 2025 80 45				.WORD SCREEN+#*SW
+    15 2027 5F					.BYTE $5F
+    15 2028 00 46				.WORD SCREEN+#*SW
+    15 202A 5F					.BYTE $5F
+    15 202B 80 46				.WORD SCREEN+#*SW
+    15 202D 5F					.BYTE $5F
+    15 202E 00 47				.WORD SCREEN+#*SW
+    15 2030 5F					.BYTE $5F
+    15 2031 80 47				.WORD SCREEN+#*SW
+    15 2033 5F					.BYTE $5F
+    15 2034 00 48				.WORD SCREEN+#*SW
+    15 2036 5F					.BYTE $5F
+    15 2037 80 48				.WORD SCREEN+#*SW
+    15 2039 5F					.BYTE $5F
+    15 203A 00 49				.WORD SCREEN+#*SW
+    15 203C 5F					.BYTE $5F
+    15 203D 80 49				.WORD SCREEN+#*SW
+    15 203F 5F					.BYTE $5F
+    15 2040 00 4A				.WORD SCREEN+#*SW
+    15 2042 5F					.BYTE $5F
+    15 2043 80 4A				.WORD SCREEN+#*SW
+    15 2045 5F					.BYTE $5F
+    15 2046 00 4B				.WORD SCREEN+#*SW
+    15 2048 5F					.BYTE $5F
+    15 2049 80 4B				.WORD SCREEN+#*SW
+    15 204B 5F					.BYTE $5F
+    15 204C 00 4C				.WORD SCREEN+#*SW
+    15 204E 5F					.BYTE $5F
+    15 204F 80 4C				.WORD SCREEN+#*SW
+    15 2051 5F					.BYTE $5F
+    15 2052 00 4D				.WORD SCREEN+#*SW
+    15 2054 5F					.BYTE $5F
+    15 2055 80 4D				.WORD SCREEN+#*SW
+    15 2057 5F					.BYTE $5F
+    15 2058 00 4E				.WORD SCREEN+#*SW
+    15 205A 5F					.BYTE $5F
+    15 205B 80 4E				.WORD SCREEN+#*SW
+    15 205D 5F					.BYTE $5F
+    15 205E 00 4F				.WORD SCREEN+#*SW
+    15 2060 5F					.BYTE $5F
+    15 2061 80 4F				.WORD SCREEN+#*SW
+    15 2063 5F					.BYTE $5F
+    15 2064 00 50				.WORD SCREEN+#*SW
+    15 2066 5F					.BYTE $5F
+    15 2067 80 50				.WORD SCREEN+#*SW
+    15 2069 5F					.BYTE $5F
+    15 206A 00 51				.WORD SCREEN+#*SW
+    15 206C 5F					.BYTE $5F
+    15 206D 80 51				.WORD SCREEN+#*SW
+    15 206F 5F					.BYTE $5F
+    15 2070 00 52				.WORD SCREEN+#*SW
+    15 2072 5F					.BYTE $5F
+    15 2073 80 52				.WORD SCREEN+#*SW
+    15 2075 5F					.BYTE $5F
+    15 2076 00 53				.WORD SCREEN+#*SW
+    15 2078 5F					.BYTE $5F
+    15 2079 80 53				.WORD SCREEN+#*SW
+    15 207B 5F					.BYTE $5F
+    15 207C 00 54				.WORD SCREEN+#*SW
+    15 207E 5F					.BYTE $5F
+    15 207F 80 54				.WORD SCREEN+#*SW
+    15 2081 5F					.BYTE $5F
+    15 2082 00 55				.WORD SCREEN+#*SW
+    15 2084 5F					.BYTE $5F
+    15 2085 80 55				.WORD SCREEN+#*SW
+    15 2087 5F					.BYTE $5F
+    15 2088 00 56				.WORD SCREEN+#*SW
+    15 208A 5F					.BYTE $5F
+    15 208B 80 56				.WORD SCREEN+#*SW
+    15 208D 5F					.BYTE $5F
+    15 208E 00 57				.WORD SCREEN+#*SW
+    15 2090 5F					.BYTE $5F
+    15 2091 80 57				.WORD SCREEN+#*SW
+    15 2093 5F					.BYTE $5F
+    15 2094 00 58				.WORD SCREEN+#*SW
+    15 2096 5F					.BYTE $5F
+    15 2097 80 58				.WORD SCREEN+#*SW
+    15 2099 5F					.BYTE $5F
+    15 209A 00 59				.WORD SCREEN+#*SW
+    15 209C 5F					.BYTE $5F
+    15 209D 80 59				.WORD SCREEN+#*SW
+    15 209F 5F					.BYTE $5F
+    15 20A0 00 5A				.WORD SCREEN+#*SW
+    15 20A2 5F					.BYTE $5F
+    15 20A3 80 5A				.WORD SCREEN+#*SW
+    15 20A5 5F					.BYTE $5F
+    15 20A6 00 5B				.WORD SCREEN+#*SW
+    15 20A8 5F					.BYTE $5F
+    15 20A9 80 5B				.WORD SCREEN+#*SW
+    15 20AB 5F					.BYTE $5F
+    15 20AC 00 5C				.WORD SCREEN+#*SW
+    15 20AE 5F					.BYTE $5F
+    15 20AF 80 5C				.WORD SCREEN+#*SW
+    15 20B1 5F					.BYTE $5F
+    15 20B2 00 5D				.WORD SCREEN+#*SW
+    15 20B4 5F					.BYTE $5F
+    15 20B5 80 5D				.WORD SCREEN+#*SW
+    15 20B7 5F					.BYTE $5F
+    15 20B8 00 5E				.WORD SCREEN+#*SW
+    15 20BA 5F					.BYTE $5F
+    15 20BB 80 5E				.WORD SCREEN+#*SW
+    15 20BD 5F					.BYTE $5F
+    15 20BE 00 5F				.WORD SCREEN+#*SW
+    15 20C0 5F					.BYTE $5F
+    15 20C1 80 5F				.WORD SCREEN+#*SW
+    15 20C3 5F					.BYTE $5F
+    15 20C4 00 60				.WORD SCREEN+#*SW
+    15 20C6 5F					.BYTE $5F
+    15 20C7 80 60				.WORD SCREEN+#*SW
+    15 20C9 5F					.BYTE $5F
+    15 20CA 00 61				.WORD SCREEN+#*SW
+    15 20CC 5F					.BYTE $5F
+    15 20CD 80 61				.WORD SCREEN+#*SW
+    15 20CF 5F					.BYTE $5F
+    15 20D0 00 62				.WORD SCREEN+#*SW
+    15 20D2 5F					.BYTE $5F
+    15 20D3 80 62				.WORD SCREEN+#*SW
+    15 20D5 5F					.BYTE $5F
+    15 20D6 00 63				.WORD SCREEN+#*SW
+    15 20D8 5F					.BYTE $5F
+    15 20D9 80 63				.WORD SCREEN+#*SW
+    15 20DB 5F					.BYTE $5F
+    15 20DC 00 64				.WORD SCREEN+#*SW
+    15 20DE 5F					.BYTE $5F
+    15 20DF 80 64				.WORD SCREEN+#*SW
+    15 20E1 5F					.BYTE $5F
+    15 20E2 00 65				.WORD SCREEN+#*SW
+    15 20E4 5F					.BYTE $5F
+    15 20E5 80 65				.WORD SCREEN+#*SW
+    15 20E7 5F					.BYTE $5F
+    15 20E8 00 66				.WORD SCREEN+#*SW
+    15 20EA 5F					.BYTE $5F
+    15 20EB 80 66				.WORD SCREEN+#*SW
+    15 20ED 5F					.BYTE $5F
+    15 20EE 00 67				.WORD SCREEN+#*SW
+    15 20F0 5F					.BYTE $5F
+    15 20F1 80 67				.WORD SCREEN+#*SW
+    15 20F3 5F					.BYTE $5F
+    15 20F4 00 68				.WORD SCREEN+#*SW
+    15 20F6 5F					.BYTE $5F
+    15 20F7 80 68				.WORD SCREEN+#*SW
+    15 20F9 5F					.BYTE $5F
+    15 20FA 00 69				.WORD SCREEN+#*SW
+    15 20FC 5F					.BYTE $5F
+    15 20FD 80 69				.WORD SCREEN+#*SW
+    15 20FF 5F					.BYTE $5F
+    15 2100 00 6A				.WORD SCREEN+#*SW
+    15 2102 5F					.BYTE $5F
+    15 2103 80 6A				.WORD SCREEN+#*SW
+    15 2105 5F					.BYTE $5F
+    15 2106 00 6B				.WORD SCREEN+#*SW
+    15 2108 5F					.BYTE $5F
+    15 2109 80 6B				.WORD SCREEN+#*SW
+    15 210B 5F					.BYTE $5F
+    15 210C 00 6C				.WORD SCREEN+#*SW
+    15 210E 5F					.BYTE $5F
+    15 210F 80 6C				.WORD SCREEN+#*SW
+    15 2111 5F					.BYTE $5F
+    15 2112 00 6D				.WORD SCREEN+#*SW
+    15 2114 5F					.BYTE $5F
+    15 2115 80 6D				.WORD SCREEN+#*SW
+    15 2117 5F					.BYTE $5F
+    15 2118 00 6E				.WORD SCREEN+#*SW
+    15 211A 5F					.BYTE $5F
+    15 211B 80 6E				.WORD SCREEN+#*SW
+    15 211D 5F					.BYTE $5F
+    15 211E 00 6F				.WORD SCREEN+#*SW
+    15 2120 5F					.BYTE $5F
+    15 2121 80 6F				.WORD SCREEN+#*SW
+    15 2123 5F					.BYTE $5F
+    15 2124 00 70				.WORD SCREEN+#*SW
+    15 2126 5F					.BYTE $5F
+    15 2127 80 70				.WORD SCREEN+#*SW
+    15 2129 5F					.BYTE $5F
+    15 212A 00 71				.WORD SCREEN+#*SW
+    15 212C 5F					.BYTE $5F
+    15 212D 80 71				.WORD SCREEN+#*SW
+    15 212F 5F					.BYTE $5F
+    15 2130 00 72				.WORD SCREEN+#*SW
+    15 2132 5F					.BYTE $5F
+    15 2133 80 72				.WORD SCREEN+#*SW
+    15 2135 5F					.BYTE $5F
+    15 2136 00 73				.WORD SCREEN+#*SW
+    15 2138 5F					.BYTE $5F
+    15 2139 80 73				.WORD SCREEN+#*SW
+    15 213B 5F					.BYTE $5F
+    15 213C 00 74				.WORD SCREEN+#*SW
+    15 213E 5F					.BYTE $5F
+    15 213F 80 74				.WORD SCREEN+#*SW
+    15 2141 5F					.BYTE $5F
+    15 2142 00 75				.WORD SCREEN+#*SW
+    15 2144 5F					.BYTE $5F
+    15 2145 80 75				.WORD SCREEN+#*SW
+    15 2147 5F					.BYTE $5F
+    15 2148 00 76				.WORD SCREEN+#*SW
+    15 214A 5F					.BYTE $5F
+    15 214B 80 76				.WORD SCREEN+#*SW
+    15 214D 5F					.BYTE $5F
+    15 214E 00 77				.WORD SCREEN+#*SW
+    15 2150 5F					.BYTE $5F
+    15 2151 80 77				.WORD SCREEN+#*SW
+    15 2153 5F					.BYTE $5F
+    15 2154 00 78				.WORD SCREEN+#*SW
+    15 2156 5F					.BYTE $5F
+    15 2157 80 78				.WORD SCREEN+#*SW
+    15 2159 5F					.BYTE $5F
+    15 215A 00 79				.WORD SCREEN+#*SW
+    15 215C 5F					.BYTE $5F
+    15 215D 80 79				.WORD SCREEN+#*SW
+    15 215F 5F					.BYTE $5F
+    15 2160 00 7A				.WORD SCREEN+#*SW
+    15 2162 5F					.BYTE $5F
+    15 2163 80 7A				.WORD SCREEN+#*SW
+    15 2165 5F					.BYTE $5F
+    15 2166 00 7B				.WORD SCREEN+#*SW
+    15 2168 5F					.BYTE $5F
+    15 2169 80 7B				.WORD SCREEN+#*SW
+    15 216B 5F					.BYTE $5F
+    15 216C 00 7C				.WORD SCREEN+#*SW
+    15 216E 5F					.BYTE $5F
+    15 216F 80 7C				.WORD SCREEN+#*SW
+    15 2171 5F					.BYTE $5F
+    15 2172 00 7D				.WORD SCREEN+#*SW
+    15 2174 5F					.BYTE $5F
+    15 2175 80 7D				.WORD SCREEN+#*SW
+    15 2177 5F					.BYTE $5F
+    15 2178 00 7E				.WORD SCREEN+#*SW
+    15 217A 5F					.BYTE $5F
+    15 217B 80 7E				.WORD SCREEN+#*SW
+    15 217D 5F					.BYTE $5F
+    15 217E 00 7F				.WORD SCREEN+#*SW
+    15 2180 5F					.BYTE $5F
+    15 2181 80 7F				.WORD SCREEN+#*SW
+Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
+    18 2183 41				.byte $41
+    19 2184 00 20			.word DL
+    20 2186			start
+    21 2186 A9 23 8D 2F 02		mva #%00100011  DMACTLS    
+    22 218B A9 00 8D 30 02 A9 + 	mwa #dl DLPTRS
+    23 2195 A9 0C 8D 20 25		mva #12 move_scr.hscr_state ;hscroll initialisation
+    24 219A 8D 04 D4			sta HSCROL
+    25 					
+    26 219D A9 00 8D C5 02		mva #0 COLPF1S
+    27 21A2 A9 0F 8D C8 02		mva #$0F COLBAKS
+    28 21A7 A9 0F 8D C6 02		mva #$0f COLPF2S
+    29 					
+    30 					
+    31 21AC 20 FA 23			jsr sprites_init
+    32 21AF			    pause 1
+Macro: PAUSE [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
+     3 21AF A2 01				ldx #1
+     4 21B1			loop   	wait
+Macro: WAIT [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
+     2 21B1 AD 0B D4				LDA VCOUNT
+     3 21B4 8D 0A D4				STA WSYNC
+     4 21B7 8D 0A D4				STA WSYNC
+     5 21BA 8D 0A D4				STA WSYNC
+     6 21BD CD 0B D4		@		CMP VCOUNT
+     7 21C0 D0 FB				BNE @-
+Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
+     5 21C2 CA			      	dex
+     6 21C3 D0 EC		      	bne loop
+Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
+    33 21C5 20 89 23			jsr ground_init
+    34
+    35 21C8 A2 14			ldx #20
+    36 21CA A0 00			ldy #0
+    37 21CC 20 AA 23			jsr cactus
+    38 21CF A2 1E			ldx #30
+    39 21D1 A0 01			ldy #1
+    40 21D3 20 AA 23			jsr cactus
+    41 21D6 A2 28			ldx #40
+    42 21D8 A0 02			ldy #2
+    43 21DA 20 AA 23			jsr cactus
+    44
+    45 21DD A2 00		xx	ldx #0 ; anim phaze
+    46 21DF A0 36		yy	ldy #54
+    47 21E1 20 32 24			jsr dino_pm
+    48 21E4 EE DE 21 AD DE 21		inc:lda xx+1
+    49 21EA C9 03			cmp #3
+    50 21EC D0 05			sne
+    51 21EE A9 00 8D DE 21		mva #0 xx+1	
+    52 21F3				key
+Macro: KEY [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
+     3 21F3 48			         PHA
+     4 21F4 AD 0F D2		?CK1      LDA SKSTAT
+     5 21F7 29 04		         AND #$04
+     6 21F9 F0 F9		         BEQ ?CK1
+     7 21FB AD 0F D2		?CK       LDA SKSTAT
+     8 21FE 29 04		         AND #$04
+     9 2200 D0 F9		         BNE ?CK
+    10 2202 68			         PLA
+Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
+    53 2203 20 04 25			jsr move_scr
+    54 2206 4C DD 21			jmp xx
+    55
+    56
+    57 2209			llp
+    58 2209 A9 00 8D 51 22		mva #0 ntmp
+    59 220E			lp
+    60 220E AE 51 22			ldx ntmp
+    61 2211 A0 62			ldy #98
+    62 2213 20 52 22			jsr dino
+    63 2216				key
+Macro: KEY [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
+     3 2216 48			         PHA
+     4 2217 AD 0F D2		?CK1      LDA SKSTAT
+     5 221A 29 04		         AND #$04
+     6 221C F0 F9		         BEQ ?CK1
+     7 221E AD 0F D2		?CK       LDA SKSTAT
+     8 2221 29 04		         AND #$04
+     9 2223 D0 F9		         BNE ?CK
+    10 2225 68			         PLA
+Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
+    64 2226 20 D5 22			jsr dino_clear
+    65 2229				key
+Macro: KEY [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
+     3 2229 48			         PHA
+     4 222A AD 0F D2		?CK1      LDA SKSTAT
+     5 222D 29 04		         AND #$04
+     6 222F F0 F9		         BEQ ?CK1
+     7 2231 AD 0F D2		?CK       LDA SKSTAT
+     8 2234 29 04		         AND #$04
+     9 2236 D0 F9		         BNE ?CK
+    10 2238 68			         PLA
+Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
+    66 2239 EE 51 22 AD 51 22		inc:lda ntmp
+    67 223F C9 03			cmp #3
+    68 2241 D0 CB			bne lp
+    69 2243 4C 09 22			jmp llp
+    70
+    71
+    72 2246				halt 03
+Macro: HALT [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
+     1 2246			?stop  
+     3 2246 AD 0A D2			      lda RANDOM 
+     4 2249 29 03			      and #03
+     5 224B 8D 1A D0			      sta COLBAK
+     7 224E 4C 46 22		      jmp ?stop
+Source: C:\jac\wudsn\Workspace\no_internet\ni.asm
+    73 					
+    74 02E0-02E1> 86 21			run start
+    75 2251-2ACB> 00		ntmp .by 0
+    76
+    77 2252				icl 'procs.asm'
+Source: C:\jac\wudsn\Workspace\no_internet\procs.asm
+     1 				;	@com.wudsn.ide.asm.mainsourcefile=ni.asm
+     2
+     3 2252			.proc dino 		; dino to the screen
+     4 					; uses: AXY tmp0 tmp1 tmp2 tmp3
+     5 					; Y - ypos in lines
+     6 					; X - dino phase (0,1,..)
+     7
+     8 = 0080				_dino = tmp 	; _underscore means pointer here and else
+     9 = 0084				_mask = tmp1    ; local vars for reusing zero page variables
+    10 = 0086				_scr  = tmp2
+    11 = 0088				_back = tmp3
+    12 2252 8C 25 27			sty dino_save_y ;save for clearing
+    13 					; get line address offset
+    14 2255 B9 5C 27			lda scr_addrs_l,y
+    15 2258 85 86			sta _scr
+    16 225A B9 DC 27			lda scr_addrs_h,y
+    17 225D 85 87			sta _scr+1
+    18 					; add x position (hardcoded, dino does not move)
+    19 225F 18 A5 86 69 0A 85 + 	adw _scr #10
+    20 					;was: mwa #screen+10+96*sw scr_ ;10 = xpos, 96 == ypos on the screen
+    21 					
+    22 226A BD D1 26			lda dino_tab_l,x
+    23 226D 85 80			sta _dino
+    24 226F BD D4 26			lda dino_tab_h,x
+    25 2272 85 81			sta _dino+1
+    26
+    27 2274 BD D7 26			lda dino_mask_tab_l,x
+    28 2277 85 84			sta _mask
+    29 2279 BD DA 26			lda dino_mask_tab_h,x
+    30 227C 85 85			sta _mask+1
+    31 					
+    32 227E A9 89 85 84 A9 26 + 	mwa #dino_mask2 _mask
+    33 2286 A9 DD 85 88 A9 26 + 	mwa #dino_back _back
+    34 228E A2 18			ldx #24
+    35 2290			loop1
+    36 2290 A0 00			ldy #0
+    37 2292			dn1	
+    38 2292 B1 86			lda (_scr),y 	; get screen contents
+    39 2294 91 88			sta (_back),y 	; save background for sprite removal
+    40 2296 B1 84			lda (_mask),y  	; mask
+    41 2298 49 FF			eor #$ff 		; inverse, 'cause mads does not inverse OK with '*'
+    42 229A 31 86			and (_scr),y 	; get screen contents
+    43 229C 11 80			ora (_dino),y 
+    44 229E 91 86			sta (_scr),y
+    45 22A0 C8				iny
+    46 22A1 C0 03			cpy #3
+    47 22A3 D0 ED			bne dn1
+    48 22A5 18 A5 80 69 03 85 + 	adw _dino #3
+    49 22B0 18 A5 84 69 03 85 + 	adw _mask #3
+    50 22BB 18 A5 88 69 03 85 + 	adw _back #3
+    51 22C6 18 A5 86 69 80 85 + 	adw _scr #sw
+    52 22D1 CA				dex
+    53 22D2 D0 BC			bne loop1
+    54 22D4 60				rts
+    55 				.endp
+    56 				;----------
+    57 22D5			.proc dino_clear 		; remove old dino
+    58 					; uses: AXY tmp2 tmp3
+    59 = 0086				_scr  = tmp2
+    60 = 0088				_back = tmp3
+    61 22D5 AC 25 27			ldy dino_save_y ;ypos 
+    62 					; get line address offset
+    63 22D8 B9 5C 27			lda scr_addrs_l,y
+    64 22DB 85 86			sta _scr
+    65 22DD B9 DC 27			lda scr_addrs_h,y
+    66 22E0 85 87			sta _scr+1
+    67 					; add x position (hardcoded, dino does not move)
+    68 22E2 18 A5 86 69 0A 85 + 	adw _scr #10
+    69 					;mwa #screen+10+96*sw scr_ ;10 = xpos, 96 == ypos on the screen
+    70 					
+    71 22ED A9 DD 85 88 A9 26 + 	mwa #dino_back _back
+    72 22F5 A2 18			ldx #24
+    73 22F7			loop1
+    74 22F7 A0 00			ldy #0
+    75 22F9			dn1	
+    76 22F9 B1 88			lda (_back),y 	; give back background for sprite removal
+    77 22FB 91 86			sta (_scr),y
+    78 22FD C8				iny
+    79 22FE C0 03			cpy #3
+    80 2300 D0 F7			bne dn1
+    81 2302 18 A5 88 69 03 85 + 	adw _back #3
+    82 230D 18 A5 86 69 80 85 + 	adw _scr #sw
+    83 2318 CA				dex
+    84 2319 D0 DC			bne loop1
+    85 231B 60				rts
+    86 				.endp
+    87 				;----------
+    88 231C			.proc ground 	; ground breaking, i.e. drawing
+    89 					; uses: AXY tmp1 tmp2
+    90 					; X: x on screen in words (2 bytes)
+    91 					; Y: ground tile number (0 - plain ground)
+    92 = 0084				_gnd = tmp1
+    93 = 0086				_scr = tmp2
+    94 					
+    95 231C B9 56 27			lda gnd_tab_l,y
+    96 231F 85 84			sta _gnd
+    97 2321 B9 59 27			lda gnd_tab_h,y
+    98 2324 85 85			sta _gnd+1
+    99 2326 A9 00 85 86 A9 78 + 	mwa #screen+112*sw _scr ;112 is ypos of ground level
+   100 232E 8A				txa
+   101 232F 0A				asl						  ;add X to xpos on screen
+   102 2330 18				clc
+   103 2331 65 86			adc _scr
+   104 2333 85 86			sta _scr
+   105 2335 90 02			scc
+   106 2337 E6 87			inc _scr+1
+   107
+   108 2339 A2 08			ldx #8 ; tile height in bytes
+   109 233B			loop1
+   110 233B A0 00			ldy #0
+   111 233D			@	
+   112 233D B1 84			lda  (_gnd),y
+   113 233F 91 86			sta  (_scr),y
+   114 2341 C8				iny
+   115 2342 C0 02			cpy #2 ; tile width in bytes
+   116 2344 D0 F7			bne @-
+   117 2346 18 A5 84 69 02 85 + 	adw _gnd #2
+   118 2351 18 A5 86 69 80 85 + 	adw _scr #sw 	;next screen line
+   119 235C CA				dex
+   120 235D D0 DC			bne loop1
+   121 					; add some debris below
+   122
+   123 235F A2 06			ldx #6  ; debris height
+   124 2361			loop2
+   125 2361 A0 01			ldy #1
+   126 2363			@
+   127 2363 AD 0A D2			lda RANDOM
+   128 2366 2D 0A D2 2D 0A D2 + :5	AND RANDOM
+   129 2375 91 86			sta (_scr),y
+   130 2377 88				dey
+   131 2378 10 E9			bpl @-
+   132 237A 18 A5 86 69 80 85 + 	adw _scr #sw 	;next screen line
+   133 2385 CA				dex
+   134 2386 10 D9			bpl loop2
+   135 					
+   136 2388 60				rts
+   137 				.endp
+   138 2389			.proc ground_init ;draws first 48 segments of a ground
+   139 2389 A9 00 85 80			mva #0 tmp
+   140 238D			ground_loop
+   141 238D A5 80			lda tmp
+   142 238F AA				tax
+   143 2390				randomize 0 2 3
+Macro: RANDOMIZE [Source: C:\jac\wudsn\Workspace\no_internet\macro.asm]
+     4 2390			?rand
+     5 2390 AD 0A D2		      lda random
+     7 2393 29 03		      	and #3
+     9 2395 C9 00		      cmp #0 		;floor
+    10 2397 90 F7		      bcc ?rand
+    11 2399 C9 03		      cmp #2+1 	;ceiling
+    12 239B B0 F3		      bcs ?rand
+Source: C:\jac\wudsn\Workspace\no_internet\procs.asm
+   144 239D A8				tay
+   145 239E 20 1C 23			jsr ground
+   146 23A1 E6 80			inc tmp
+   147 23A3 A5 80			lda tmp
+   148 23A5 C9 18			cmp #24  ; screen width in wide mode /2 
+   149 23A7 D0 E4			bne ground_loop
+   150 23A9 60				rts
+   151 				.endp
+   152 				;----------
+   153 23AA			.proc cactus 	; drawing cactii
+   154 					; uses: AXY tmp1 tmp2
+   155 					; X: x on screen in bytes
+   156 					; Y: cactus number
+   157 					; draws from bottom up, utilising the fact that .bmp is saved this way
+   158 				    ; updt.: was not able to load .bmp files for unknown reason, so the pics are flipped with WUDSN script
+   159 					
+   160 = 0084				_cact = tmp1
+   161 = 0086				_scr = tmp2
+   162 					
+   163 23AA B9 C6 2A			lda cact_tab_l,y
+   164 23AD 85 84			sta _cact
+   165 23AF B9 C9 2A			lda cact_tab_h,y
+   166 23B2 85 85			sta _cact+1
+   167 23B4 A9 00 85 86 A9 7D + 	mwa #screen+122*sw _scr ;112 is ypos of bottom of the cactii
+   168 23BC 8A				txa
+   169 23BD 18				clc
+   170 23BE 65 86			adc _scr
+   171 23C0 85 86			sta _scr
+   172 23C2 90 02			bcc no_inc
+   173 23C4 E6 87			inc _scr+1
+   174 23C6			no_inc
+   175
+   176 					
+   177 23C6 B9 C0 2A			lda cact_widths,y
+   178 23C9 8D F9 23			sta cact_w ; width in bytes
+   179
+   180 23CC B9 C3 2A			lda cact_heights,y
+   181 23CF AA				tax
+   182 23D0			loop
+   183 23D0 A0 00			ldy #0
+   184 23D2			@
+   185 23D2 B1 86			lda  (_scr),y
+   186 23D4 11 84			ora  (_cact),y
+   187 23D6 91 86			sta  (_scr),y
+   188 23D8 C8				iny
+   189 23D9 CC F9 23			cpy cact_w 
+   190 23DC D0 F4			bne @-
+   191 					;adw _cact cact_w  ;!!!DOES NOT WORK :(((((
+   192 23DE 18				clc
+   193 23DF AD F9 23			lda cact_w
+   194 23E2 65 84			adc _cact
+   195 23E4 85 84			sta _cact
+   196 23E6 90 02			scc
+   197 23E8 E6 85			inc _cact+1
+   198 					
+   199 23EA 38 A5 86 E9 80 85 + 	sbw _scr #sw 
+   200 23F5 CA				dex
+   201 23F6 D0 D8			bne loop
+   202 23F8 60				rts
+   203 23F9 00			cact_w .by 0
+   204 				.endp
+   205 				;----------
+   206
+   207 23FA			.proc sprites_init
+   208 				;setting up P/M graphics
+   209 23FA A9 90		    lda #>pmgraph
+   210 23FC 8D 07 D4		    sta pmbase
+   211 23FF AD 2F 02		    lda dmactls
+   212 2402 09 0C		    ora #%00001100    ; Players and Missiles single lined
+   213 2404 8D 2F 02		    sta dmactls
+   214 2407 A9 03		    lda #$03    ; P/M on
+   215 2409 8D 1D D0		    sta pmcntl
+   216 240C A9 00		    lda #$00
+   217 240E 8D 0C D0		    sta sizem ; there will be only M0, double width
+   218 2411 8D 08 D0		    sta sizep0 ; P0-P3 widths
+   219 2414 8D 09 D0		    sta sizep0+1
+   220 2417 8D 0A D0		    sta sizep0+2
+   221 241A 8D 0B D0		    sta sizep0+3
+   222 241D A9 11		    lda #$11 ; P/M priorities (bit 4 joins missiles), bit 0 - players on top
+   223 241F 8D 6F 02		    sta gtictls
+   224 				    /*
+   225 				    ; temporary colours of sprites
+   226 				    mva #$52 COLPM0
+   227 					mva #$34 COLPM1
+   228 				    mva #$76 COLPM2
+   229 				    mva #$90 COLPM3
+   230 				    mva #$B0 COLPF3S
+   231 				    */
+   231
+   232 = 002A				dx = 42
+   233 2422 A9 2A 8D 00 D0		mva #dx HPOSP0
+   234 2427 A9 32 8D 01 D0		mva #dx+8 HPOSP1
+   235 242C A9 3A 8D 02 D0		MVA #dx+8*2 HPOSP2
+   236
+   237 2431 60				rts
+   238 				.endp
+   239
+   240 2432			.proc dino_pm
+   241 					; uses: AXY tmp tmp1 tmp2 tmp3
+   242 					; X: dino animation phase
+   243 					; Y: Y position of dino
+   244 					
+   245 = 0084				_dino = tmp1 	 	; _underscore means pointer here and else
+   246 = 0086				_dino_sav = tmp2 	; local vars for reusing zero page variables
+   247 = 0088				_spr  = tmp3
+   248 					;tmp = tmp
+   249 					
+   250 2432 AD E1 24 8D E2 24		mva dino_save_pm_y dino_save_pm_y_prev
+   251 2438 8C E1 24			sty dino_save_pm_y 	;save for clearing
+   252
+   253
+   254 243B BD D1 26			lda dino_tab_l,x
+   255 					;sta _dino
+   256 243E 85 86			sta _dino_sav
+   257 2440 BD D4 26			lda dino_tab_h,x
+   258 					;sta _dino+1
+   259 2443 85 87			sta _dino_sav+1
+   260
+   261 					
+   262 2445 A9 00 8D E0 24		mva #0 counter
+   263
+   264 244A			loop0
+   265 					; sprite address calc
+   266 244A A9 00 85 88 A9 92 + 	mwa #(pmgraph+$200) _spr   	;1st sprite starts at PMBASE + $200
+   267 												;counter *$80	
+   268 2452 A9 80 85 80 A9 FF + 	mwa #-$80 tmp				;so first add gives "0"
+   269 245A AC E0 24			ldy counter
+   270 245D			@
+   271 245D 18 A5 80 69 80 85 + 	adw tmp #$80				;tmp = counter*$80 - calc addr of the sprite to put gfx
+   272 2468 88				dey
+   273 2469 10 F2			bpl @-
+   274 					
+   275 246B 18 A5 88 65 80 85 + 	adw _spr tmp
+   276 2478 A5 88 85 80 A5 89 + 	mwa _spr tmp ; save address - it will be used in clearing and then drawing
+   277
+   278 2480 AD E2 24			lda dino_save_pm_y_prev		;clearing old sprite, same way as drawing a new one
+   279 2483 18				clc 						;add ypos to the sprite address
+   280 2484 65 88			adc _spr
+   281 2486 85 88			sta _spr
+   282 					;scc
+   283 					;inc _spr+1					;not necessary, sprites are not crossing pages
+   284
+   285 2488 A0 00			ldy #0						;delete old sprite here
+   286 248A 98				tya
+   287 248B A2 18			ldx #24 	;dino height
+   288 248D			@
+   289 248D 91 88			sta (_spr),y
+   290 248F C8				iny
+   291 2490 CA				dex
+   292 2491 D0 FA			bne @-
+   293
+   294
+   295 					
+   296 					;--------------------------
+   297 2493 A5 80 85 88 A5 81 + 	mwa tmp _spr
+   298 249B AD E1 24			lda dino_save_pm_y			;drawing sprite at a new position
+   299 249E 18				clc 						;add ypos to the sprite address
+   300 249F 65 88			adc _spr
+   301 24A1 85 88			sta _spr
+   302 					;scc
+   303 					;inc _spr+1					;not necessary, sprites are not crossing pages
+   304
+   305
+   306 24A3 18				clc				;beginning of the next column of dino to the sprite
+   307 24A4 A5 86			lda _dino_sav	;0- first column, 1 - 2nd, 2 - 3rd
+   308 24A6 6D E0 24			adc counter
+   309 24A9 85 84			sta _dino
+   310 					;bcc @+			;needs to be removed as both bytes must be copied
+   311 24AB A5 87			lda _dino_sav+1	;original address
+   312 24AD 69 00			adc #0
+   313 24AF 85 85			sta _dino+1		
+   314 				;@
+   315 					
+   316 24B1 A0 00			ldy #0
+   317 					
+   318 24B3 A2 18			ldx #24 	;dino height
+   319 24B5			@
+   320 24B5 B1 84			lda (_dino),y
+   321 24B7 91 88			sta (_spr),y
+   322 24B9 18 A5 84 69 03 85 + 	adw _dino #3	;+3 ==> next line in dino
+   323 24C4 18 A5 88 69 01 85 + 	adw _spr #1
+   324 24CF CA				dex
+   325 24D0 D0 E3			bne @-
+   326 					
+   327 					
+   328 					
+   329 24D2 EE E0 24 AD E0 24		inc:lda counter
+   330 24D8 C9 03			cmp #3
+   331 24DA F0 03 4C 4A 24		jne loop0
+   332
+   333 					
+   334 					
+   335 24DF 60				rts
+   336 24E0 00			counter 			.by 0
+   337 24E1 00			dino_save_pm_y		.by 0
+   338 24E2 00			dino_save_pm_y_prev	.by 0
+   339
+   340 				.endp
+   341
+   342 24E3			.proc move_dl ;screen window one byte right
+   343 					;uses: AXY
+   344
+   345 24E3 A9 04 8D F0 24 A9 + 	mwa #dl_addrs+1 incr+1 ;self mod
+   346 24ED A2 80			ldx #sh
+   347 24EF EE FF FF		incr	inc $ffff
+   348 24F2 18 AD F0 24 69 03 + 	adw incr+1 #3
+   349 2500 CA				dex
+   350 2501 D0 EC			bne incr
+   351 2503 60				rts
+   352 				.endp
+   353
+   354 2504			.proc move_scr ;screen window one step (1/4 th of byte) right
+   355 2504 CE 20 25 AD 20 25		dec:lda hscr_state
+   356 250A 8D 04 D4			sta HSCROL
+   357 250D C9 04			cmp #4
+   358 250F D0 0E			bne @+
+   359 2511 A9 0C 8D 20 25		mva #12 hscr_state
+   360 2516 8D 04 D4			sta HSCROL
+   361 2519 20 E3 24			jsr move_dl
+   362 251C 20 E3 24			jsr move_dl
+   363 251F			@	
+   364 251F 60				rts
+   365 2520 00			hscr_state 	.by 0
+   366 				.endp
+    78 2521				icl 'artwork.asm'
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+     1 				;	@com.wudsn.ide.asm.mainsourcefile=ni.asm
+     2 				;-------------------------------------------------------------
+     3 					;24x24 pix = 3x3 chars (3x24 bytes)
+     4 					.rept 3, #
+     5 				DINO:1 
+     6 					INS 'art/dino:1.data'
+     7 					.ENDR
+     7 					.endr
+Source: REPT
+     5 2521			DINO0 
+     5 2521 00 00 00 00 03 FC + 	INS 'art/dino0.data'
+     5 2569			DINO1 
+     5 2569 00 00 00 00 03 FC + 	INS 'art/dino1.data'
+     5 25B1			DINO2 
+     5 25B1 00 00 00 00 03 FC + 	INS 'art/dino2.data'
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+     8
+     9 					.rept 3, #
+    10 				DINO_MASK:1 
+    11 					INS 'art/dino_mask:1.data'
+    12 					.ENDR
+    12 					.endr
+Source: REPT
+    10 25F9			DINO_MASK0 
+    10 25F9 FF F8 01 FF F0 00 + 	INS 'art/dino_mask0.data'
+    10 2641			DINO_MASK1 
+    10 2641 FF F8 01 FF F0 00 + 	INS 'art/dino_mask1.data'
+    10 2689			DINO_MASK2 
+    10 2689 00 07 FE 00 0F FF + 	INS 'art/dino_mask2.data'
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    13
+    14 26D1			dino_tab_l
+    15 					.rept 3, #
+    16 						.BY <DINO:1
+    17 					.ENDR
+    17 					.endr
+Source: REPT
+    16 26D1 21					.BY <DINO0
+    16 26D2 69					.BY <DINO1
+    16 26D3 B1					.BY <DINO2
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    18 26D4			dino_tab_h
+    19 					.rept 3, #
+    20 						.BY >DINO:1
+    21 					.ENDR
+    21 					.endr
+Source: REPT
+    20 26D4 25					.BY >DINO0
+    20 26D5 25					.BY >DINO1
+    20 26D6 25					.BY >DINO2
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    22
+    23 26D7			dino_mask_tab_l
+    24 					.rept 3, #
+    25 						.BY <DINO_MASK:1
+    26 					.ENDR
+    26 					.endr
+Source: REPT
+    25 26D7 F9					.BY <DINO_MASK0
+    25 26D8 41					.BY <DINO_MASK1
+    25 26D9 89					.BY <DINO_MASK2
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    27 26DA			dino_mask_tab_h
+    28 					.rept 3, #
+    29 						.BY >DINO_MASK:1
+    30 					.ENDR
+    30 					.endr
+Source: REPT
+    29 26DA 25					.BY >DINO_MASK0
+    29 26DB 26					.BY >DINO_MASK1
+    29 26DC 26					.BY >DINO_MASK2
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    31
+    32 26DD			dino_back ; background save for dino sprite
+    33 26DD 00 00 00 00 00 00 + :3*24 			.by 0
+    34 2725 00			dino_save_y		.by 0
+    35
+    36 				;------------------------------
+    37 				; ground pictures, 8x16 px = 2x1 chars (2x8 bytes)
+    38 					.rept 3, #
+    39 				GND_:1
+    40 					INS 'art/gnd_:1.data'
+    41 					.ENDR
+    41 					.endr
+Source: REPT
+    39 2726			GND_0
+    39 2726 00 00 00 00 00 00 + 	INS 'art/gnd_0.data'
+    39 2736			GND_1
+    39 2736 03 F0 06 18 1C 0C + 	INS 'art/gnd_1.data'
+    39 2746			GND_2
+    39 2746 00 00 00 00 00 00 + 	INS 'art/gnd_2.data'
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    42 2756			gnd_tab_l
+    43 					.rept 3, #
+    44 						.BY <GND_:1
+    45 					.ENDR
+    45 					.endr
+Source: REPT
+    44 2756 26					.BY <GND_0
+    44 2757 36					.BY <GND_1
+    44 2758 46					.BY <GND_2
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    46 2759			gnd_tab_h
+    47 					.rept 3, #
+    48 						.BY >GND_:1
+    49 					.ENDR
+    49 					.endr
+Source: REPT
+    48 2759 27					.BY >GND_0
+    48 275A 27					.BY >GND_1
+    48 275B 27					.BY >GND_2
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    50 275C			scr_addrs_l
+    51 275C 00 80 00 80 00 80 + :sh		.by <(screen+#*sw)
+    52 27DC			scr_addrs_h
+    53 27DC 40 40 41 41 42 42 + :sh		.by >(screen+#*sw)
+    54 				;------------------------------
+    55 				; cacti pictures, height and width variable
+    56 				; cactX.data is flipped vertically
+    57 = 0003			cacti = 3
+    58
+    59 					.rept cacti, #
+    60 				CACT:1
+    61 					INS 'art/cact:1.data'
+    62 					.ENDR
+    62 					.endr
+Source: REPT
+    60 285C			CACT0
+    60 285C 00 00 00 00 03 E0 + 	INS 'art/cact0.data'
+    60 28E8			CACT1
+    60 28E8 00 00 00 00 00 7F + 	INS 'art/cact1.data'
+    60 29A8			CACT2
+    60 29A8 00 00 00 00 00 00 + 	INS 'art/cact2.data'
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    63
+    64 2AC0			cact_widths 	; widths of cactii in bytes
+    65 2AC0 04 04 08			.by  4, 4, 8
+    66 2AC3			cact_heights	; heights of cactii in lines
+    67 2AC3 23 30 23			.by 35,48,35
+    68 2AC6			cact_tab_l
+    69 					.rept cacti, #
+    70 						.BY <CACT:1
+    71 					.ENDR
+    71 					.endr
+Source: REPT
+    70 2AC6 5C					.BY <CACT0
+    70 2AC7 E8					.BY <CACT1
+    70 2AC8 A8					.BY <CACT2
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    72 2AC9			cact_tab_h
+    73 					.rept cacti, #
+    74 						.BY >CACT:1
+    75 					.ENDR
+    75 					.endr
+Source: REPT
+    74 2AC9 28					.BY >CACT0
+    74 2ACA 28					.BY >CACT1
+    74 2ACB 29					.BY >CACT2
+Source: C:\jac\wudsn\Workspace\no_internet\artwork.asm
+    76

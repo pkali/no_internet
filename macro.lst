@@ -1,0 +1,148 @@
+mads 2.0.6 build 58 (28 Jan 17)
+Source: C:\jac\wudsn\Workspace\no_internet\macro.asm
+     1 				;-------------------------------------
+     2 				  .MACRO ROLW
+     3 				     ROL :1
+     4 				    ROL :1+1
+     5 				  .ENDM
+     6 				;-------------------------------------
+     7 				  .MACRO ASLW
+     8 				    ASL :1
+     9 				    ROL :1+1
+    10 				  .ENDM
+    11 				;-------------------------------------
+    12 				  .MACRO RORW
+    13 				    ROR :1+1
+    14 				    ROR :1
+    15 				  .ENDM
+    16 				;-------------------------------------
+    17 				  .MACRO LSRW
+    18 				    LSR :1+1
+    19 				    ROR :1
+    20 				  .ENDM
+    21
+    22 				;-------------------------------------
+    23 				         .MACRO VMAIN
+    24 				;	VMAIN #WORD,interrupt.vector
+    25 				; interrupt.vector:
+    26 				;    0 - VIMIRQ
+    27 				;    1 - TIMCNT1
+    28 				;    2 - TIMCNT2
+    29 				;    3 - TIMCNT3
+    30 				;    4 - TIMCNT4
+    31 				;    5 - TIMCNT5
+    32 				;    6 - VVBLKI
+    33 				;    7 - VVBLKD
+    34 				;    8 - TIMVEC1
+    35 				;    9 - TIMVEC2
+    36 				;	Initialises Vertical Blank Interrupts
+    37 				;       (works only with system interrupts ON)
+    38 				         LDY # <:1
+    39 				         LDX # >:1
+    40 				         LDA #:2
+    41 				         JSR SETVBV
+    42 				         .ENDM
+    43 				;-------------------------------------
+    44 				         .MACRO VDLI
+    45 				;	VDLI #WORD
+    46 				;	Initialises Display List Interrupts
+    47 				         LDY # <:1
+    48 				         LDX # >:1
+    49 				         LDA #$C0
+    50 				         STY $0200
+    51 				         STX $0201
+    52 				         STA NMIEN
+    53 				         .ENDM
+    54 				;-------------------------------------
+    55 				      .MACRO halt
+    56 				?stop  
+    57 				      .if :1
+    58 					      lda RANDOM 
+    59 					      and #:1
+    60 					      sta COLBAK
+    61 				      .endif
+    62 				      jmp ?stop
+    63 				      .ENDM
+    64 				;-------------------------------------
+    65 				         .MACRO KEY
+    66 				;	KEY
+    67 				;	waits for releasing and pressing "any key"
+    68 				         PHA
+    69 				?CK1      LDA SKSTAT
+    70 				         AND #$04
+    71 				         BEQ ?CK1
+    72 				?CK       LDA SKSTAT
+    73 				         AND #$04
+    74 				         BNE ?CK
+    75 				         PLA
+    76 				         .ENDM
+    77 				;-------------------------------------
+    78 					.MACRO WAIT	;waits one frame (1/50 s(PAL) or 1/60s(NTSC))
+    79 					;uses: A
+    80 						LDA VCOUNT
+    81 						STA WSYNC
+    82 						STA WSYNC
+    83 						STA WSYNC
+    84 				@		CMP VCOUNT
+    85 						BNE @-
+    86 					.ENDM
+    87 				;-------------------------------------
+    88 				    .macro negw
+    89 				    ; negate the given word (0-a)
+    90 				;-------------------------------------
+    91 				        sec
+    92 				        lda #$00
+    93 				        sbc :1
+    94 				        sta :1
+    95 				        lda #$00
+    96 				        sbc :1+1
+    97 				        sta :1+1
+    98 				    .endm
+    99 				;-------------------------------------
+   100 				    .macro randomize     ;returns (in A) a random .byte between "floor" (incl) and "ceiling" (excl)
+   101 				    ;usage: randomize floor ceiling AND
+   102 				    ;uses: A
+   103 				    
+   104 				?rand
+   105 				      lda random
+   106 				      .if :3
+   107 				      	and #:3
+   108 				      .endif
+   109 				      cmp #:1 		;floor
+   110 				      bcc ?rand
+   111 				      cmp #:2+1 	;ceiling
+   112 				      bcs ?rand
+   113 				    .endm
+   114 				;-------------------------------------
+   115 				    .macro phx
+   116 				      txa
+   117 				      pha
+   118 				    .endm
+   119 				;-------------------------------------
+   120 				    .macro phy
+   121 				      tya
+   122 				      pha
+   123 				    .endm
+   124 				;-------------------------------------
+   125 				    .macro plx
+   126 				      pla
+   127 				      tax
+   128 				    .endm
+   129 				;-------------------------------------
+   130 				    .macro ply
+   131 				      pla
+   132 				      tay
+   133 				    .endm
+   134 				;-------------------------------------
+   135 					.macro pause	;waits :1 number (byte) of frames 
+   136 					;uses: AX
+   137 					.if :1 > 0 
+   138 						ldx #:1
+   139 				loop   	wait
+   140 				      	dex
+   141 				      	bne loop
+   142 				     .else
+   143 				     	wait
+   144 				     .endif
+   145 				    .ENDM
+   146
