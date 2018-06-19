@@ -3,8 +3,9 @@
 	icl 'macro.asm'
 
 	.zpvar tmp, tmp0, tmp1, tmp2, tmp3 .word
-sw = $80 ;screen width in bytes
-sh = 128 ; screen height in lines
+sw = $80 ;physical screen width in bytes (distance between beginnings of consecutive lines)
+sw_log = 48 ;logical screen width
+sh = 128 ;screen height in lines
 screen = $4000
 pmgraph = $9000
 	org $2000

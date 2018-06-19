@@ -342,6 +342,8 @@ dino_save_pm_y_prev	.by 0
 .proc move_dl ;screen window one byte right
 	;uses: AXY
 
+	inc:lda x_scr_offset
+	cmp #sw_l
 	mwa #dl_addrs+1 incr+1 ;self mod
 	ldx #sh
 incr	inc $ffff
@@ -350,6 +352,7 @@ incr	inc $ffff
 	bne incr
 	rts
 .endp
+x_scr_offset .by 0 ;where is the beginning of the screen
 
 .proc move_scr ;screen window one step (1/4 th of byte) right
 	dec:lda hscr_state
